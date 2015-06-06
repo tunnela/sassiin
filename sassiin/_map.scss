@@ -1,0 +1,413 @@
+/**
+ * Sassiin
+ *
+ * @copyright   Copyright 2015, Lauri Tunnela
+ * @license     http://tunne.la/MIT.txt The MIT License
+ */
+
+@charset "UTF-8";
+
+/// @group Map
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-set
+/// @requires {function} multi-map-column
+///
+/// @throws multi-map-column() expects at least 2 parameters, #{$argc} given
+/// @throws multi-map-column() expects parameter 1 to be a list of maps, #{$list-type} given
+/// @throws multi-map-column() expects parameter 2 to be a string or a number, #{$column-key-type} given
+/// @throws multi-map-column() expects parameter 3 to be a string or a number, #{$index-key-type} given
+/// @throws multi-map-column() expects parameter 1 to be a list of maps, the list contains at least one #{$map-type}
+@function multi-map-column($args...) {
+	$argc: length($args);
+
+	@if $argc < 2 {
+		@error "multi-map-column() expects at least 2 parameters, #{$argc} given";
+	}
+	$list: nth($args, 1);
+	$list-type: type-of($list);
+}
+
+/// @group Map
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-set
+/// @requires {function} multi-map-column
+///
+/// @throws multi-map-column() expects at least 2 parameters, #{$argc} given
+/// @throws multi-map-column() expects parameter 1 to be a list of maps, #{$list-type} given
+/// @throws multi-map-column() expects parameter 2 to be a string or a number, #{$column-key-type} given
+/// @throws multi-map-column() expects parameter 3 to be a string or a number, #{$index-key-type} given
+/// @throws multi-map-column() expects parameter 1 to be a list of maps, the list contains at least one #{$map-type}
+@function multi-map-column($args...) {
+	$argc: length($args);
+
+	@if $argc < 2 {
+		@error "multi-map-column() expects at least 2 parameters, #{$argc} given";
+	}
+	$list: nth($args, 1);
+	$list-type: type-of($list);
+
+	@if $list-type != list {
+		@error "multi-map-column() expects parameter 1 to be a list of maps, #{$list-type} given";
+	}
+	$column-key: nth($args, 2);
+	$column-key-type: type-of($column-key);
+
+	@if $column-key-type != number and $column-key-type != string {
+		@error "multi-map-column() expects parameter 2 to be a string or a number, #{$column-key-type} given";
+	}
+	$index-key: null;
+	$return-map: false;
+
+	@if $argc == 3 {
+		$index-key: nth($args, 3);
+		$index-key-type: type-of($index-key);
+
+		@if $index-key-type != number and $index-key-type != string {
+			@error "multi-map-column() expects parameter 3 to be a string or a number, #{$index-key-type} given";
+		}
+		$return-map: true;
+	}
+	$list-length: length($list);
+	$columns: ();
+
+	@for $i from 1 through $list-length {
+		$map: nth($list, $i);
+		$map-type: type-of($map);
+		
+		@if $map-type != map {
+			@error "multi-map-column() expects parameter 1 to be a list of maps, the list contains at least one #{$map-type}";
+		}
+		@if map-has-key($map, $column-key) and ($index-key == null or map-has-key($map, $index-key)) {
+			$value: map-get($map, $column-key);
+
+			@if $return-map {
+				$index: map-get($map, $index-key);
+				$columns: map-set($columns, $index, $value);
+			} @else {
+				$columns: append($columns, $value);
+			}
+		}
+	}
+	@return $columns;
+}
+
+/// @group Map
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-set
+/// @requires {function} map-slice
+///
+/// @throws map-slice() expects at least 2 parameters, #{$argc} given
+/// @throws map-slice() expects parameter 1 to be a map, #{$map-type} given
+/// @throws map-slice() expects parameter 2 to be an integer, #{$offset-type} given
+/// @throws map-slice() expects parameter 3 to be an integer, #{$end-type} given
+@function map-slice($args...) {
+	$argc: length($args);
+
+	@if $argc < 2 {
+		@error "map-slice() expects at least 2 parameters, #{$argc} given";
+	}
+	$map: nth($args, 1);
+	$map-type: type-of($map);
+
+	@if $map-type != map {
+		@error "map-slice() expects parameter 1 to be a map, #{$map-type} given";
+	}
+	$map-length: length($map);
+
+	$offset: nth($args, 2);
+	$offset-type: type-of($offset);
+
+	@if $offset-type != number {
+		@error "map-slice() expects parameter 2 to be an integer, #{$offset-type} given";
+	}
+	$end: null;
+
+	@if $argc > 2  {
+		$end: nth($args, 3);
+		$end-type: type-of($end);
+
+		@if $end-type != number {
+			@error "map-slice() expects parameter 3 to be an integer, #{$end-type} given";
+		}
+		@if $end < 0 {
+			$end: $map-length + $end + 1;
+		} @else {
+			$end: $offset + $end;
+		}
+	}
+	$slice: ();
+	$values: map-values($map);
+	$keys: map-keys($map);
+
+	@if $end >= $offset {
+		@for $i from $offset to $end {
+			$slice: map-set($slice, nth($keys, $i), nth($values, $i));
+		}
+	}
+	@return $slice;
+}
+
+/// @group Map
+///
+/// @parameter $map
+/// @parameter $n
+@function map-nth-value($map, $n) {
+	@return nth(map-values($map), $n);
+}
+
+/// @group Map
+///
+/// @parameter $map
+/// @parameter $n
+@function map-nth-key($map, $n) {
+	@return nth(map-keys($map), $n);
+}
+
+/// @group Map
+///
+/// @parameter $map
+/// @parameter {boolean} $use-key [false]
+///
+/// @requires {function} map-nth-key
+/// @requires {function} map-nth-value
+/// @requires {function} map-slice
+/// @requires {function} num-compare
+/// @requires {function} quick-map-sort
+/// @requires {function} str-compare
+@function quick-map-sort($map, $use-key: false) {
+	@if length($map) < 2 {
+		@return $map;
+	}
+	$left: ();
+	$right: ();
+
+	$nth: map-nth-value($map, 1);
+	$nth-key: map-nth-key($map, 1);
+
+	$pivot: if($use-key, $nth-key, $nth);
+	$pivot-key: if($use-key, $nth, $nth-key);
+
+	$pivot-type: type-of($pivot);
+	$pivot-length: str-length("" + $pivot);
+
+	$map: map-slice($map, 2, length($map) - 1);
+
+	@each $ik, $i in $map {
+		$item: if($use-key, $ik, $i);
+		$item-key: if($use-key, $i, $ik);
+		$item-type: type-of($item);
+		$item-length: str-length("" + $item);
+		$compare: null;
+
+		@if $item-type == string or $pivot-type == string {
+			$compare: str-compare($item, $pivot);
+		} @else {
+			$compare: num-compare($item, $pivot);
+		}
+		@if $compare < 0 {
+			$left: map-merge($left, if($use-key, ($item: $item-key), ($item-key: $item)));
+		} @else {
+			$right: map-merge($right, if($use-key, ($item: $item-key), ($item-key: $item)));
+		}
+	}
+	$new-pivot: if($use-key, ($pivot: $pivot-key), ($pivot-key: $pivot));
+
+    @return map-merge(map-merge(quick-map-sort($left, $use-key), $new-pivot), quick-map-sort($right, $use-key));
+}
+
+/// @group Map
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-key-sort
+///
+/// @throws map-key-sort() expects at least 1 parameter, #{$argc} given
+/// @throws map-key-sort() expects parameter 1 to be a map, #{$map-type} given
+/// @throws map-key-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not
+@function map-key-sort($args...) {
+	$argc: length($args);
+
+	@if $argc < 1 {
+		@error "map-key-sort() expects at least 1 parameter, #{$argc} given";
+	}
+	$map: nth($args, 1);
+	$map-type: type-of($map);
+
+	@if $map-type != map {
+		@error "map-key-sort() expects parameter 1 to be a map, #{$map-type} given";
+	}
+	$algorithm: quick;
+
+	@if $argc > 1 {
+		$algorithm: nth($args, 2);
+
+		@if not function-exists("#{$algorithm}-map-sort") {
+			@error "map-key-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not";
+		}
+	}
+	@return call("#{$algorithm}-map-sort", $map, true);
+}
+
+/// @group Map
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-sort
+///
+/// @throws map-sort() expects at least 1 parameter, #{$argc} given
+/// @throws map-sort() expects parameter 1 to be a map, #{$map-type} given
+/// @throws map-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not
+@function map-sort($args...) {
+	$argc: length($args);
+
+	@if $argc < 1 {
+		@error "map-sort() expects at least 1 parameter, #{$argc} given";
+	}
+	$map: nth($args, 1);
+	$map-type: type-of($map);
+
+	@if $map-type == list and length($map) == 0 {
+		@return ();
+	}
+	@if $map-type != map {
+		@error "map-sort() expects parameter 1 to be a map, #{$map-type} given";
+	}
+	$algorithm: quick;
+
+	@if $argc > 1 {
+		$algorithm: nth($args, 2);
+
+		@if not function-exists("#{$algorithm}-map-sort") {
+			@error "map-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not";
+		}
+	}
+	@return call("#{$algorithm}-map-sort", $map, false);
+}
+
+/// @group Map
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-key-sort
+///
+/// @throws map-key-sort() expects at least 1 parameter, #{$argc} given
+/// @throws map-key-sort() expects parameter 1 to be a map, #{$map-type} given
+/// @throws map-key-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not
+@function map-key-sort($args...) {
+	$argc: length($args);
+
+	@if $argc < 1 {
+		@error "map-key-sort() expects at least 1 parameter, #{$argc} given";
+	}
+	$map: nth($args, 1);
+	$map-type: type-of($map);
+
+	@if $map-type != map {
+		@error "map-key-sort() expects parameter 1 to be a map, #{$map-type} given";
+	}
+	$algorithm: quick;
+
+	@if $argc > 1 {
+		$algorithm: nth($args, 2);
+
+		@if not function-exists("#{$algorithm}-map-sort") {
+			@error "map-key-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not";
+		}
+	}
+	@return call("#{$algorithm}-map-sort", $map, true);
+}
+
+/// @group Map
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-reverse
+///
+/// @throws map-reverse() expects only 1 parameter, #{$argc} given
+/// @throws map-reverse() expects parameter 1 to be a map, #{$map-type} given
+@function map-reverse($args...) {
+	$argc: length($args);
+
+	@if $argc != 1 {
+		@error "map-reverse() expects only 1 parameter, #{$argc} given";
+	}
+	$map: nth($args, 1);
+	$map-type: type-of($map);
+
+	@if $map-type != map {
+		@error "map-reverse() expects parameter 1 to be a map, #{$map-type} given";
+	}
+	$flipped-map: ();
+
+	@each $key, $item in $map {
+		$flipped-map: map-merge(($key: $item), $flipped-map);
+	}
+	@return $flipped-map;
+}
+
+/// @group Map
+///
+/// @parameter $map
+/// @parameter $key
+/// @parameter $value
+@function map-set($map, $key, $value) {
+	@return map-merge($map, ($key: $value));
+}
+
+/// @group Map
+///
+/// @parameter $map
+@function map-to-list($map) {
+	@if type-of($map) == map {
+		$new-map: ();
+		$new-map: append($new-map, $map);
+		@return $new-map;
+	}
+	@return $map;
+}
+
+/// @group Map
+///
+/// @parameter $map
+/// @parameter $key
+///
+/// @requires {function} increment
+/// @requires {function} map-set
+@function map-increment($map, $key) {
+	@return map-set($map, $key, increment(map-get($map, $key)));
+}
+
+/// @group Map
+///
+/// @parameter $map
+/// @parameter $key
+///
+/// @requires {function} decrement
+/// @requires {function} map-set
+@function map-decrement($map, $key) {
+	@return map-set($map, $key, decrement(map-get($map, $key)));
+}
+
+/// @group Map
+///
+/// @parameter $items
+///
+/// @requires {function} map-list-flatten
+@function map-list-flatten($items) {
+	$list: ();
+
+	@if type-of($items) == list {
+		@each $item in $items {
+			$list: join($list, map-list-flatten($item));
+		}
+	} @elseif type-of($items) == map {
+		$list: append($list, $items);
+	}
+	@return $list;
+}

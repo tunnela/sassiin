@@ -1,0 +1,412 @@
+/**
+ * Sassiin
+ *
+ * @copyright   Copyright 2015, Lauri Tunnela
+ * @license     http://tunne.la/MIT.txt The MIT License
+ */
+
+@charset "UTF-8";
+
+/// @group List
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-set
+/// @requires {function} multi-list-column
+///
+/// @throws multi-list-column() expects at least 2 parameters, #{$argc} given
+/// @throws multi-list-column() expects parameter 1 to be a list of lists, #{$list-type} given
+/// @throws multi-list-column() expects parameter 2 to be a number, larger or equal than 1, #{$column-key-type} given
+/// @throws multi-list-column() expects parameter 3 to be a number, larger or equal than 1, #{$index-key-type} given
+/// @throws multi-list-column() expects parameter 1 to be a list of lists, the list contains at least one #{$inner-list-type}
+@function multi-list-column($args...) {
+	$argc: length($args);
+
+	@if $argc < 2 {
+		@error "multi-list-column() expects at least 2 parameters, #{$argc} given";
+	}
+	$list: nth($args, 1);
+	$list-type: type-of($list);
+
+	@if $list-type != list {
+		@error "multi-list-column() expects parameter 1 to be a list of lists, #{$list-type} given";
+	}
+	$column-key: nth($args, 2);
+	$column-key-type: type-of($column-key);
+
+	@if $column-key-type != number or $column-key < 1 {
+		@error "multi-list-column() expects parameter 2 to be a number, larger or equal than 1, #{$column-key-type} given";
+	}
+	$index-key: null;
+	$return-map: false;
+
+	@if $argc == 3 {
+		$index-key: nth($args, 3);
+		$index-key-type: type-of($index-key);
+
+		@if $index-key-type != number or $index-key < 1 {
+			@error "multi-list-column() expects parameter 3 to be a number, larger or equal than 1, #{$index-key-type} given";
+		}
+		$return-map: true;
+	}
+	$list-length: length($list);
+	$columns: ();
+
+	@for $i from 1 through $list-length {
+		$inner-list: nth($list, $i);
+		$inner-list-type: type-of($inner-list);
+		
+		@if $inner-list-type != list {
+			@error "multi-list-column() expects parameter 1 to be a list of lists, the list contains at least one #{$inner-list-type}";
+		}
+		$inner-list-length: length($inner-list);
+
+		@if $column-key <= $inner-list-length and ($index-key == null or $index-key <= $inner-list-length) {
+			$value: nth($inner-list, $column-key);
+
+			@if $return-map {
+				$index: nth($inner-list, $index-key);
+				$columns: map-set($columns, $index, $value);
+			} @else {
+				$columns: append($columns, $value);
+			}
+		}
+	}
+	@return $columns;
+}
+
+/// @group List
+///
+/// @parameter $list
+///
+/// @requires {function} list-merge
+/// @requires {function} list-slice
+/// @requires {function} num-compare
+/// @requires {function} quick-list-sort
+/// @requires {function} str-compare
+@function quick-list-sort($list) {
+	@if length($list) < 2 {
+		@return $list;
+	}
+	$left: ();
+	$right: ();
+	$pivot: nth($list, 1);
+	$pivot-type: type-of($pivot);
+	$pivot-length: str-length("" + $pivot);
+	$list: list-slice($list, 2, length($list) - 1);
+
+	@each $item in $list {
+		$item-type: type-of($item);
+		$item-length: str-length("" + $item);
+		$compare: null;
+
+		@if $item-type == string or $pivot-type == string {
+			$compare: str-compare($item, $pivot);
+		} @else {
+			$compare: num-compare($item, $pivot);
+		}
+		@if $compare < 0 {
+			$left: append($left, $item);
+		} @else {
+			$right: append($right, $item);
+		}
+	}
+	$new-pivot: ();
+	$new-pivot: append($new-pivot, $pivot);
+
+    @return list-merge(quick-list-sort($left), $new-pivot, quick-list-sort($right));
+}
+
+/// @group List
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} list-slice
+///
+/// @throws list-slice() expects at least 2 parameters, #{$argc} given
+/// @throws list-slice() expects parameter 1 to be a list, #{$list-type} given
+/// @throws list-slice() expects parameter 2 to be an integer, #{$offset-type} given
+/// @throws list-slice() expects parameter 3 to be an integer, #{$end-type} given
+@function list-slice($args...) {
+	$argc: length($args);
+
+	@if $argc < 2 {
+		@error "list-slice() expects at least 2 parameters, #{$argc} given";
+	}
+	$list: nth($args, 1);
+	$list-type: type-of($list);
+
+	@if $list-type != list {
+		@error "list-slice() expects parameter 1 to be a list, #{$list-type} given";
+	}
+	$list-length: length($list);
+
+	$offset: nth($args, 2);
+	$offset-type: type-of($offset);
+
+	@if $offset-type != number {
+		@error "list-slice() expects parameter 2 to be an integer, #{$offset-type} given";
+	}
+	$end: null;
+
+	@if $argc > 2  {
+		$end: nth($args, 3);
+		$end-type: type-of($end);
+
+		@if $end-type != number {
+			@error "list-slice() expects parameter 3 to be an integer, #{$end-type} given";
+		}
+		@if $end < 0 {
+			$end: $list-length + $end + 1;
+		} @else {
+			$end: $offset + $end;
+		}
+	}
+	$slice: ();
+
+	@if $end >= $offset {
+		@for $i from $offset to $end {
+			$slice: append($slice, nth($list, $i));
+		}
+	}
+	@return $slice;
+}
+
+/// @group List
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} list-to-string
+///
+/// @throws list-to-string() expects at least 1 parameters, #{$argc} given
+/// @throws list-to-string() expects parameter 1 to be a list, #{$list-type} given
+/// @throws list-to-string() expects parameter 2 to be a string, #{$glue-type} given
+/// @throws list-to-string() does not expect parameter 1 to contain maps
+@function list-to-string($args...) {
+	$argc: length($args);
+
+	@if $argc < 1 {
+		@error "list-to-string() expects at least 1 parameters, #{$argc} given";
+	}
+	$list: nth($args, 1);
+	$list-type: type-of($list);
+
+	@if $list-type != list {
+		@error "list-to-string() expects parameter 1 to be a list, #{$list-type} given";
+	}
+	$glue: "";
+
+	@if $argc > 1 {
+		$glue: nth($args, 2);
+		$glue-type: type-of($glue);
+
+		@if $glue-type != string {
+			@error "list-to-string() expects parameter 2 to be a string, #{$glue-type} given";
+		}
+	}
+	$list-length: length($list);
+	$list-count: 1;
+	$string: "";
+
+	@each $item in $list {
+		$sub-string: "";
+
+		@if type-of($item) == map {
+			@error "list-to-string() does not expect parameter 1 to contain maps";
+		} @elseif type-of($item) == list {
+			$sub-string: list-to-string($item, $glue);
+		} @else {
+			$sub-string: $item;
+		}
+		$string: $string + $sub-string;
+
+		@if $list-count < $list-length {
+			$string: $string + $glue;
+		}
+		$list-count: $list-count + 1;
+	}
+	@return $string;
+}
+
+/// @group List
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} list-merge
+///
+/// @throws list-merge() expects at least 2 parameters, #{$argc} given
+/// @throws list-merge() expects lists only, #{$list-type} given
+@function list-merge($args...) {
+	$argc: length($args);
+
+	@if $argc < 2 {
+		@error "list-merge() expects at least 2 parameters, #{$argc} given";
+	}
+	$merged-list: ();
+
+	@for $i from 1 through $argc {
+		$list: nth($args, $i);
+		$list-type: type-of($list);
+
+		@if $list-type != list {
+			@error "list-merge() expects lists only, #{$list-type} given";
+		}
+		@each $item in $list {
+			$merged-list: append($merged-list, $item);
+		}
+	}
+	@return $merged-list;
+}
+
+/// @group List
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} list-sort
+///
+/// @throws list-sort() expects at least 1 parameter, #{$argc} given
+/// @throws list-sort() expects parameter 1 to be a list, #{$list-type} given
+/// @throws list-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not
+@function list-sort($args...) {
+	$argc: length($args);
+
+	@if $argc < 1 {
+		@error "list-sort() expects at least 1 parameter, #{$argc} given";
+	}
+	$list: nth($args, 1);
+	$list-type: type-of($list);
+
+	@if $list-type != list {
+		@error "list-sort() expects parameter 1 to be a list, #{$list-type} given";
+	}
+	$algorithm: quick;
+
+	@if $argc > 1 {
+		$algorithm: nth($args, 2);
+
+		@if not function-exists("#{$algorithm}-list-sort") {
+			@error "list-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not";
+		}
+	}
+	@return call("#{$algorithm}-list-sort", $list);
+}
+
+/// @group List
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} list-reverse
+///
+/// @throws list-reverse() expects 1 parameter, #{$argc} given
+/// @throws list-reverse() expects parameter 1 to be a list, #{$list-type} given
+@function list-reverse($args...) {
+	$argc: length($args);
+
+	@if $argc != 1 {
+		@error "list-reverse() expects 1 parameter, #{$argc} given";
+	}
+	$list: nth($args, 1);
+	$list-type: type-of($list);
+
+	@if $list-type != list {
+		@error "list-reverse() expects parameter 1 to be a list, #{$list-type} given";
+	}
+	$flipped-list: ();
+
+	@each $item in $list {
+		$flipped-list: join($item, $flipped-list);
+	}
+	@return $flipped-list;
+}
+
+/// @group List
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} list-contains
+///
+/// @throws list-contains() expects 2 parameters, #{$argc} given
+/// @throws list-contains() expects parameter 1 to be a list, #{$list-type} given
+@function list-contains($args...) {
+	$argc: length($args);
+
+	@if $argc != 2 {
+		@error "list-contains() expects 2 parameters, #{$argc} given";
+	}
+	$list: nth($args, 1);
+	$list-type: type-of($list);
+	$list-length: length($list);
+
+	@if $list-length > 1 and $list-type != list {
+		@error "list-contains() expects parameter 1 to be a list, #{$list-type} given";
+	}
+	@return if(index($list, nth($args, 2)) == null, false, true);
+}
+
+/// @group List
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} prepend
+///
+/// @throws prepend() expects 2 parameters, #{$argc} given
+/// @throws prepend() expects parameter 1 to be a list, #{$list-type} given
+@function prepend($args...) {
+	$argc: length($args);
+
+	@if $argc != 2 {
+		@error "prepend() expects 2 parameters, #{$argc} given";
+	}
+	$list: nth($args, 1);
+	$list-type: type-of($list);
+	$list-length: length($list);
+
+	@if $list-length > 1 and $list-type != list {
+		@error "prepend() expects parameter 1 to be a list, #{$list-type} given";
+	}
+	$prepend: ();
+	$prepend: append($prepend, nth($args, 2));
+	
+	@return join($prepend, $list);
+}
+
+/// @group List
+///
+/// @parameter $a
+/// @parameter $b
+@function list-intersect($a, $b) {
+	$intersection: ();
+
+	@each $value in $a {
+		@if index($b, $value) != null {
+			$intersection: append($intersection, $value);
+		}
+	}
+	@return $intersection;
+}
+
+/// @group List
+///
+/// @parameter $list
+/// @parameter $value
+@function index-other($list, $value) {
+	@for $index from 1 to length($list) {
+		@if nth($list, $index) != $value {
+			@return $index;
+		}
+	}
+	@return null;
+}
+
+/// @group List
+///
+/// @parameter $value
+@function list($value) {
+	@if type-of($value) == list {
+		@return $value;
+	}
+	$list: ();
+	$list: append($list, $value);
+	
+	@return $list;
+}

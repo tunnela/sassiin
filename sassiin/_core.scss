@@ -1,0 +1,1977 @@
+/**
+ * Sassiin
+ *
+ * @copyright   Copyright 2015, Lauri Tunnela
+ * @license     http://tunne.la/MIT.txt The MIT License
+ */
+
+@charset "UTF-8";
+
+$unique: unique-id();
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {mixin} handler
+@mixin value-handler($args...) {
+	@include handler(value, $args...);
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {mixin} handler
+@mixin post-declaration-handler($args...) {
+	@include handler(post-declaration, $args...);
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {mixin} handler
+@mixin pre-declaration-handler($args...) {
+	@include handler(pre-declaration, $args...);
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} _get
+/// @requires {function} index-other
+/// @requires {function} map-set
+/// @requires {function} types
+/// @requires {mixin} _set
+///
+/// @throws handler() expects at least 2 parameters, #{$argc} given
+/// @throws handler() expects parameter 1 to be a string, #{$name-type} given
+/// @throws handler() expects parameter 2 to be a name of a handler function
+/// @throws handler() expects parameter 3 to be a property-list string, #{$property-list-type} given
+/// @throws handler() expects parameter 4 to be a priority number, #{$priority-type} given
+/// @throws handler() expects parameter 3 to be a property-list string or priority number, #{$property-list-type} given
+@mixin handler($args...) {
+	$argc: length($args);
+
+	@if $argc < 2 {
+		@error "handler() expects at least 2 parameters, #{$argc} given";
+	}
+	$type: nth($args, 1);
+	$type-type: type-of($type);
+
+	@if $type-type != string {
+		@error "handler() expects parameter 1 to be a string, #{$name-type} given";
+	}
+	$handler: nth($args, 2);
+	$handler-type: type-of($handler);
+
+	@if $handler-type != string or not function-exists($handler) {
+		@error "handler() expects parameter 2 to be a name of a handler function";
+	}
+	$property-list: "";
+	$property-list-type: null;
+
+	$priority: 100;
+	$priority-type: null;
+
+	@if $argc >= 3 {
+		$property-list: nth($args, 3);
+		$property-list-type: type-of($property-list);
+
+		@if $argc == 4 {
+			$priority: nth($args, 4);
+			$priority-type: type-of($priority);
+
+			@if $property-list-type != string and index-other(types($property-list), string) != null {
+				@error "handler() expects parameter 3 to be a property-list string, #{$property-list-type} given";
+			}
+			@if $priority-type != number {
+				@error "handler() expects parameter 4 to be a priority number, #{$priority-type} given";
+			}
+		} @elseif $property-list-type == number {
+			$priority: $property-list;
+			$property-list: "";
+		} @elseif $property-list-type != string and index-other(types($property-list), string) != null {
+			@error "handler() expects parameter 3 to be a property-list string or priority number, #{$property-list-type} given";
+		}
+	}
+	$counter: _get(handler-counter, 0);
+	$handlers: _get(handlers, ());
+
+	@include _set(handlers, map-set($handlers, "#{$priority}-#{$counter}", (
+		handler: $handler,
+		type: $type,
+		property-list: $property-list
+	)));
+	@include _set(handler-counter, $counter + 1);
+}
+
+/// @group Core
+///
+/// @parameter $type
+///
+/// @requires {function} _get
+/// @requires {function} map-key-sort
+@function handlers($type) {
+	$return: ();
+	$handlers: _get(handlers, ());
+
+	@if type-of($handlers) == map {
+		$handlers: map-key-sort($handlers);
+	}
+	@each $key, $options in $handlers {
+		@if map-get($options, type) == $type {
+			$return: append($return, $options);
+		}
+	}
+	@return $return;
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} _build-action
+@function replace-declaration($args...) {
+	@return _build-action(replace-declaration, $args...);
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} _build-action
+@function append-declaration($args...) {
+	@return _build-action(append-declaration, $args...);
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} _build-action
+@function prepend-declaration($args...) {
+	@return _build-action(prepend-declaration, $args...);
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} _build-action
+@function remove-declaration($args...) {
+	@return _build-action(remove-declaration, $args...);
+}
+
+/// @group Core
+///
+/// @parameter $type
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-nth-key
+/// @requires {function} map-nth-value
+/// @requires {function} map-to-list
+@function _build-action($type, $args...) {
+	$argc: length($args);
+
+	@if str-index($type, remove) != null {
+		@return (
+			type: $type
+		);
+	}
+	@if $argc == 0 {
+		@error $type + "() expects at least 1 parameter, #{$argc} given";
+	}
+	$values: nth($args, 1);
+	$isDeclaration: str-index($type, declaration) != null;
+	$action: ();
+
+	@if $isDeclaration and $argc == 2 {
+		$action: (
+			type: $type,
+			value: nth($args, 2),
+			property: $values
+		);
+	} @elseif $isDeclaration && $argc == 1 and type-of($values) == list and length($values) > 0 {
+		@each $declaration in $values {
+			$action: append($action, (
+				type: $type,
+				property: map-nth-key($declaration, 1),
+				value: map-nth-value($declaration, 1)
+			), space);
+		}
+	} @elseif $isDeclaration == false and $argc == 1 {
+		$action: (
+			type: $type,
+			value: $value
+		);
+	}
+	@return map-to-list($action);
+}
+
+/// @group Core
+///
+/// @parameter $handlers
+/// @parameter $declaration
+///
+/// @requires {function} map-to-list
+/// @requires {function} prepend
+@function _process($handlers, $declaration) {
+	$property: map-get($declaration, property);
+	$values: map-get($declaration, value);
+	$prepend: ();
+	$append: ();
+	$this: ();
+	$this: append($this, $declaration); 
+
+	@if length($handlers) > 0 {
+		@each $options in $handlers {
+			$property-list: map-get($options, property-list);
+			$handler: map-get($options, handler);
+
+			@if $property-list == "" or index($property-list, $property) != null {
+				$actions: map-to-list(call($handler, $property, $values));
+
+				@if length($actions) > 0 {
+					@each $action in $actions {
+						@if type-of($action) == map {
+							$type: map-get($action, type);
+							$action: map-remove($action, type);
+
+							@if $type == replace-declaration {
+								$this: ();
+								$this: append($this, $action);
+							} @elseif $type == prepend-declaration {
+								$prepend: prepend($prepend, $action);
+							} @elseif $type == append-declaration {
+								$append: append($append, $action);
+							} @elseif $type == remove-declaration {
+								$this: ();
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	@if length($this) > 0 {
+		@return map-to-list(
+			join(
+				join(map-to-list($prepend), map-to-list($this)), 
+				map-to-list($append)
+			)
+		);
+	}
+	@return ();
+}
+
+/// @group Core
+///
+/// @parameter $property
+/// @parameter $values
+///
+/// @requires {function} _process
+/// @requires {function} handlers
+@function _handle($property, $values) {
+	$pre-handlers: handlers(pre-declaration);
+	$pre-declarations: _process($pre-handlers, (property: $property, value: $values));
+	$post-handlers: handlers(post-declaration);
+	$declarations: ();
+
+	@if length($post-handlers) == 0 {
+		$declarations: $pre-declarations;
+	} @else {
+		@each $declaration in $pre-declarations {
+			$declarations: join($declarations, _process($post-handlers, $declaration));
+		}
+	}
+	@return $declarations;
+}
+
+/// @group Core
+///
+/// @parameter $values
+/// @parameter $value [null]
+///
+/// @requires {function} _handle
+/// @requires {function} current-breakpoint
+/// @requires {mixin} mixin
+@mixin _handle($values, $value: null) {
+	@if type-of($values) == map {
+		@each $property, $value in $values {
+			@include handle($property, $value);
+		}
+	} @else if $value != null {
+		@each $declaration in _handle($values, $value) {
+			$mixin: map-get($declaration, mixin);
+			$args: map-get($declaration, args);
+			$property: map-get($declaration, property);
+			$value: map-get($declaration, value);
+
+			@if length($value) > 0 {
+				@if $mixin == null {
+					#{$property}: #{$value};
+				} @elseif not current-breakpoint() {
+					@include mixin($mixin, $args...) {
+						#{$property}: #{$value};
+					}
+				}
+			}
+		}
+	}
+}
+
+/// @group Core
+///
+/// @parameter $mixin
+/// @parameter {arglist} $args...
+///
+/// @requires {mixin} on
+@mixin mixin($mixin, $args...) {
+	@if $mixin == on {
+		@include on($args...) {
+			@content;
+		}
+	}
+}
+
+/// @group Core
+///
+/// @parameter $mixin
+/// @parameter $actions
+/// @parameter {arglist} $args...
+///
+/// @requires {function} map-set
+@function mixin($mixin, $actions, $args...) {
+	$return: ();
+
+	@each $action in $actions {
+		@if type-of($action) == map {
+			$new-action: ();
+			$new-action: append($new-action, $action);
+			$action: $new-action;
+		}
+		@each $map in $action {
+			$map: map-set($map, mixin, $mixin);
+			$map: map-set($map, args, $args);
+			$return: append($return, $map);
+		}
+	}
+	@return $return;
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} mixin
+@function on($args...) {
+	@return mixin(on, $args...);
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {mixin} _handle
+@mixin _($args...) {
+	@include _handle($args...);
+}
+
+/// @group Core
+///
+/// @parameter $properties
+@function types($properties) {
+	$types: null;
+	
+	@if type-of($properties) == list {
+		$types: ();
+
+		@each $property in $properties {
+			$types: append($types, type-of($property));
+		}
+	} @else {
+		$types: type-of($properties);
+	}
+	@return $types;
+}
+
+@function media-operators() {
+	@return "only" "not";
+}
+
+/// @group Core
+///
+/// @parameter $operator
+///
+/// @requires {function} media-operators
+@function is-media-operator($operator) {
+	@return index(media-operators(), $operator) != null;
+}
+
+@function media-types() {
+	@return all aural braille handheld print projection screen tty tv embossed;
+}
+
+/// @group Core
+///
+/// @parameter $type
+///
+/// @requires {function} media-types
+@function is-media-type($type) {
+	@return index(media-types(), $type) != null;
+}
+
+@function directions() {
+	@return left right up down;
+}
+
+/// @group Core
+///
+/// @parameter $direction
+///
+/// @requires {function} directions
+/// @requires {function} list-contains
+@function is-direction($direction) {
+	@return list-contains(directions(), $direction);
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} is-media-operator
+/// @requires {function} is-media-type
+/// @requires {function} map-set
+/// @requires {function} types
+///
+/// @throws Invalid expression `#{$expression}`
+@function parse-media-query($args...) {
+	$queries: ();
+
+	@if length($args) == 0 {
+		$args: all;
+	}
+	@each $query in $args {
+		$type: null;
+		$type-prefix: null;
+		$expressions: ();
+		$expressions-length: length($query);
+		$expressions-types: types($query);
+
+		@if $expressions-length == 0 {
+			@return ();
+		}
+		$string-index: index($expressions-types, string);
+		$list-index: index($expressions-types, list);
+		$one-expression: $expressions-length < 4 and $list-index == null;
+
+		@if $string-index {
+			$str: nth($query, $string-index);
+
+			@if is-media-operator($str) or is-media-type($str) {
+				$one-expression: false;
+			}
+		}
+		@if $one-expression {
+			$new-query: ();
+			$new-query: append($new-query, $query);
+			$query: $new-query;
+			$expressions-length: length($query);
+		}
+		@each $expression in $query {
+			$expression-length: length($expression);
+			$expression-types: types($expression);
+			$expression-types-1: nth($expression-types, 1);
+			$feature-1: nth($expression, 1);
+
+			@if $expression-types == number {
+				@if unit($expression) == "" {
+					$expression: $expression / 16 * 1em;
+				}
+				$expressions: map-set($expressions, min-width, $expression);
+			} @elseif $expression-types == string and is-media-operator($feature-1) {
+				$type-prefix: $expression;
+			} @elseif $expression-types == string and is-media-type($feature-1) {
+				$type: $expression;
+			} @elseif $expression-types == string {
+				$expressions: map-set($expressions, $feature-1, true);
+			} @elseif $expression-types == (string number number) or 
+			$expression-types == (string color color) {
+				$feature-2: nth($expression, 2);
+				$feature-3: nth($expression, 3);
+
+				@if $expression-types == (string number number) {
+					@if unit($feature-2) == "" {
+						$feature-2: $feature-2 / 16 * 1em;
+					}
+					@if unit($feature-3) == "" {
+						$feature-3: $feature-3 / 16 * 1em;
+					}
+				}
+				$expressions: map-merge($expressions, (min-#{$feature-1}: $feature-2, max-#{$feature-1}: $feature-3));
+			} @elseif $expression-types == (number number)  {
+				$feature-2: nth($expression, 2);
+
+				@if unit($feature-1) == "" {
+					$feature-1: $feature-1 / 16 * 1em;
+				}
+				@if unit($feature-2) == "" {
+					$feature-2: $feature-2 / 16 * 1em;
+				}
+				$expressions: map-merge($expressions, (min-width: $feature-1, max-width: $feature-2));
+			} @elseif $expression-types-1 == string and $expression-length == 2 and 
+			$expression-types != (string string) {
+				$feature-2: nth($expression, 2);
+
+				@if type-of($feature-2) == number and unit($feature-2) == "" {
+					$feature-2: $feature-2 / 16 * 1em;
+				}
+				$expressions: map-set($expressions, $feature-1, $feature-2);
+			} @else {
+				@error "Invalid expression `#{$expression}`";
+			}
+		}
+		@if $type != null {
+			@if $type-prefix {
+				$type: $type-prefix + " " + $type;
+			}
+			$expressions: map-set($expressions, $type, true);
+		}
+		$queries: append($queries, $expressions);
+	}
+	@return $queries;
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} parse-media-query
+@function pmq($args...) {
+	@return parse-media-query($args...);
+}
+
+/// @group Core
+///
+/// @requires {function} _get
+@function media-query() {
+	@return _get(media-query-id, null) != null;
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} is-media-operator
+/// @requires {function} is-media-type
+/// @requires {function} list-to-string
+/// @requires {function} parse-media-query
+@function media-query-string($args...){
+	$query-list: ();
+
+	@each $query in parse-media-query($args...) {
+		$type: null;
+		$type-prefix: null;
+		$expression-list: ();
+
+		@each $key, $value in $query {
+			$expression: null;
+
+			@if $value == true {
+				@if is-media-type($key) {
+					$type: $key;
+				} @elseif is-media-operator($key) {
+					$type-prefix: $key;
+				} @else {
+					$expression-list: append($expression-list, "(#{$key})");
+				}
+			} @else {
+				$expression-list: append($expression-list, "(#{$key}: #{$value})");
+			}
+		}
+		$query-string: list-to-string($expression-list, " and ");
+		
+		@if $type != null {
+			@if $type-prefix {
+				$type: $type-prefix + " " + $type;
+			}
+			@if $query-string == "" {
+				$query-string: $type; 
+			} @else {
+				$query-string: $type + " and " + $query-string; 
+			}
+		}
+		$query-list: append($query-list, $query-string);
+	}
+	$query-string: list-to-string($query-list, ", ");
+
+	@if $query-string == "" {
+		$query-string: all;
+	}
+	@return $query-string;
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} media-query-id
+/// @requires {function} media-query-string
+/// @requires {mixin} _set
+/// @requires {mixin} media-query-id
+@mixin media-query($args...) {
+	$query-string: media-query-string($args...);
+	
+	@media #{$query-string} {
+		@include media-query-id($query-string);
+		@include _set(media-query-id, media-query-id($query-string));
+		@content;
+		@include _set(media-query-id, null);
+	}
+}
+
+/// @group Core
+///
+/// @parameter $media-query-ids
+///
+/// @requires {mixin} _set
+@mixin media-query-ids($media-query-ids) {
+	@include _set(media-query-ids, $media-query-ids); 
+}
+
+/// @group Core
+///
+/// @requires {function} _get
+@function media-query-ids() {
+	@return _get(media-query-ids, ()); 
+}
+
+/// @group Core
+///
+/// @parameter $media-query
+///
+/// @requires {function} map-set
+/// @requires {function} media-query-ids
+/// @requires {mixin} media-query-ids
+@mixin media-query-id($media-query) {
+	$ids: media-query-ids();
+
+	@if not map-has-key($ids, $media-query) {
+		@include media-query-ids(map-set($ids, $media-query, unique-id()));
+	}
+}
+
+/// @group Core
+///
+/// @parameter $media-query
+///
+/// @requires {function} media-query-ids
+@function media-query-id($media-query) {
+	@return map-get(media-query-ids(), $media-query);
+}
+
+// @function scope($args...) {
+// 	@debug $args..
+// 	$ids: media-query-ids();
+// 	$media-query: media-query-string($args...);
+// 	@debug $ids;
+// 	@debug media-query-string($args...);
+
+// 	@if map-has-key($ids, $media-query) {
+// 		@return map-get($ids, $media-query);
+// 	}
+// 	@return true;
+// }
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {mixin} media-query
+@mixin mq($args...) {
+	@include media-query($args...) {
+		@content;
+	}
+}
+
+/// @group Core
+///
+/// @parameter $group-name
+/// @parameter $name
+/// @parameter $default [null]
+///
+/// @requires {function} breakpoint-groups
+@function breakpoint-group-option($group-name, $name, $default: null) {
+	$breakpoint-groups: breakpoint-groups();
+
+	@if map-has-key($breakpoint-groups, $group-name) {
+		$group-options: map-get($breakpoint-groups, $group-name);
+
+		@if map-has-key($group-options, $name) {
+			@return map-get($group-options, $name);
+		}
+	}
+	@return $default;
+}
+
+/// @group Core
+///
+/// @parameter $group-name
+/// @parameter $name
+/// @parameter $value
+///
+/// @requires {function} breakpoint-groups
+/// @requires {function} map-set
+/// @requires {mixin} breakpoint-groups
+@mixin breakpoint-group-option($group-name, $name, $value) {
+	$breakpoint-groups: breakpoint-groups();
+	$group-options: ();
+
+	@if map-has-key($breakpoint-groups, $group-name) {
+		$group-options: map-get($breakpoint-groups, $group-name);
+	} @else {
+		$group-options: ();
+	}
+	$group-options: map-set($group-options, $name, $value);
+	
+	@include breakpoint-groups(map-set($breakpoint-groups, $group-name, $group-options));
+}
+
+/// @group Core
+///
+/// @parameter $breakpoint-name
+/// @parameter $name
+/// @parameter $default [null]
+///
+/// @requires {function} breakpoints
+@function breakpoint-option($breakpoint-name, $name, $default: null) {
+	$breakpoints: breakpoints();
+
+	@if map-has-key($breakpoints, $breakpoint-name) {
+		$breakpoint-options: map-get($breakpoints, $breakpoint-name);
+
+		@if map-has-key($breakpoint-options, $name) {
+			@return map-get($breakpoint-options, $name);
+		}
+	}
+	@return $default;
+}
+
+/// @group Core
+///
+/// @parameter $breakpoint-name
+/// @parameter $name
+/// @parameter $value
+///
+/// @requires {function} breakpoints
+/// @requires {function} map-set
+/// @requires {mixin} breakpoints
+@mixin breakpoint-option($breakpoint-name, $name, $value) {
+	$breakpoints: breakpoints();
+	$breakpoint-options: ();
+
+	@if map-has-key($breakpoints, $breakpoint-name) {
+		$breakpoint-options: map-get($breakpoints, $breakpoint-name);
+	} @else {
+		$breakpoint-options: ();
+	}
+	$breakpoint-options: map-set($breakpoint-options, $name, $value);
+	
+	@include breakpoints(map-set($breakpoints, $breakpoint-name, $breakpoint-options));
+}
+
+/// @group Core
+///
+/// @parameter $name
+/// @parameter $default [null]
+/// @parameter {boolean} $scope [true]
+/// @parameter {boolean} $fallback [true]
+///
+/// @requires {function} _exists
+/// @requires {function} _get
+/// @requires {function} exec
+/// @requires {function} is-executable
+@function get($name, $default: null, $scope: true, $fallback: true) {
+	$sassiin: () !global !default;
+	$id: if($scope == true, _get(media-query-id, null), $scope);
+	$from: $sassiin;
+
+	@if $id != null {
+		@if _exists($id) {
+			$temp: _get($id, ());
+			
+			@if map-has-key($temp, $name) {
+				$from: $temp;
+			} @else if $fallback {
+				$from: $sassiin;
+			} @else {
+				@return $default;
+			}
+		}
+	}
+	@if map-has-key($from, $name) {
+		$value: map-get($from, $name);
+
+		@if is-executable($value) {
+			@return exec($value);
+		}
+		@return $value;
+	} @else {
+		@return $default;
+	}
+}
+
+/// @group Core
+///
+/// @parameter $name
+/// @parameter $value [null]
+/// @parameter {boolean} $scope [true]
+///
+/// @requires {function} _get
+/// @requires {function} map-set
+/// @requires {mixin} set
+@mixin set($name, $value: null, $scope: true) {
+	$sassiin: () !global !default;
+
+	@if type-of($name) == map {
+		@each $key, $value in $name {
+			@include set($key, $value, $scope);
+		}
+	} @else {
+		$id: if($scope == true, _get(media-query-id, null), $scope);
+
+		@if $id == null {
+			$sassiin: map-set($sassiin, $name, $value) !global;
+		} @else {
+			$map: _get($id, ());
+			$map: map-set($map, $name, $value);
+			$sassiin: map-set($sassiin, $id, $map) !global;
+		}
+	}
+}
+
+/// @group Core
+///
+/// @parameter $name
+/// @parameter {boolean} $scope [true]
+///
+/// @requires {function} _get
+@function exists($name, $scope: true) {
+	$sassiin: () !global !default;
+	$id: if($scope == true, _get(media-query-id, null), $scope);
+	$temp: $sassiin;
+
+	@if $id != null {
+		$temp: ();
+
+		@if map-has-key($sassiin, $id) {
+			$temp: map-get($sassiin, $id);
+		}
+	}
+	@return map-has-key($temp, $name);
+}
+
+/// @group Core
+///
+/// @parameter $name
+/// @parameter {boolean} $scope [true]
+///
+/// @requires {function} _get
+/// @requires {function} map-set
+@mixin unset($name, $scope: true) {
+	$sassiin: () !global !default;
+	$id: if($scope == true, _get(media-query-id, null), $scope);
+
+	@if $id == null {
+		$sassiin: map-remove($sassiin, $name) !global;
+	} @else {
+		$map: _get($id, ());
+		$map: map-remove($map, $name);
+		$sassiin: map-set($sassiin, $id, $map) !global;
+	}
+}
+
+/// @group Core
+///
+/// @parameter $name
+/// @parameter $default [null]
+///
+/// @requires {mixin} set
+@mixin _set($name, $default: null) {
+	@include set($name, $default, null);
+}
+
+/// @group Core
+///
+/// @parameter $name
+/// @parameter $default [null]
+///
+/// @requires {function} get
+@function _get($name, $default: null) {
+	@return get($name, $default, null, false);
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {function} exists
+@function _exists($name) {
+	@return exists($name, null);
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {mixin} unset
+@mixin _unset($name) {
+	@include unset($name, null);
+}
+
+/// @group Core
+///
+/// @parameter $callable
+///
+/// @requires {function} char-at
+@function is-callable($callable) {
+	@return type-of($callable) == string and str-length($callable) > 0 and char-at($callable, 1) == '@';
+}
+
+/// @group Core
+///
+/// @parameter $values
+///
+/// @requires {function} is-callable
+@function is-executable($values) {
+	@if type-of($values) == list {
+		@each $value in $values {
+			@if is-callable($value) {
+				@return true;
+			}
+		}
+		@return false;
+	}
+	@return is-callable($values);
+}
+
+/// @group Core
+///
+/// @parameter $stack
+///
+/// @requires {function} exec
+/// @requires {function} is-callable
+@function exec($stack) {
+	$return: ();
+	$values: ();
+	$current-action: false;
+	$action-count: 0;
+
+	@each $action in $stack {
+		$action-type: type-of($action);
+
+		@if is-callable($action) {
+			$action-count: $action-count + 1;
+
+			@if $current-action != false {
+				$return: append($return, call($current-action, $values...));
+			}
+			$values: ();
+			$current-action: str-slice($action, 2);
+		} @else if $action-type == list {
+			$values: append($values, exec($action));
+		} @else {
+			$values: append($values, $action);
+		}
+	}
+	@if $current-action != false {
+		$return: append($return, call($current-action, $values...));
+	}
+	@if $action-count == 0 {
+		@if length($values) == 0 {
+			@return null;
+		}
+		$return: $values;
+	}
+	@return if(length($return) == 1, nth($return, 1), $return);
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} breakpoints
+/// @requires {mixin} breakpoint-option
+/// @requires {mixin} breakpoints
+///
+/// @throws breakpoint() expects at least 1 parameter, #{$argc} given
+/// @throws breakpoint() expects parameter 1 to be a string, #{$name-type} given
+/// @throws breakpoint() expects parameters 2 and 3 to be numbers or autos
+@mixin breakpoint($args...) {
+	$argc: length($args);
+
+	@if $argc < 1 {
+		@error "breakpoint() expects at least 1 parameter, #{$argc} given";
+	}
+	$name: nth($args, 1);
+	$name-type: type-of($name);
+
+	@if $name-type != string {
+		@error "breakpoint() expects parameter 1 to be a string, #{$name-type} given";
+	}
+	$breakpoints: breakpoints();
+
+	@if map-has-key($breakpoints, $name) {
+		$breakpoints: map-remove($breakpoints, $name);
+	}
+	@include breakpoints($breakpoints);
+
+	$width: null;
+	$height: null;
+	$media-query: null;
+
+	@if $argc > 1 {
+		$arg2: nth($args, 2);
+		$arg2-type: type-of($arg2);
+
+		@if type-of($arg2) == number or $arg2 == auto {
+			$width: $arg2;
+		} @elseif $argc == 2 {
+			$media-query: $arg2;
+		}
+	}
+	@if $argc > 2 {
+		$arg3: nth($args, 3);
+
+		@if type-of($arg3) == number or $arg3 == auto {
+			$height: $arg3;
+		}
+	}
+	@include breakpoint-option($name, name, $name);
+	@include breakpoint-option($name, postfix, $name);
+	@include breakpoint-option($name, text, $name);
+
+	@if $media-query != null {
+		@include breakpoint-option($name, type, media-query);
+		@include breakpoint-option($name, media-query, $media-query);
+	} @elseif $width != null or $height != null {
+		@include breakpoint-option($name, type, dimensions);
+
+		@if $width != null {
+			@include breakpoint-option($name, width, $width);
+		}
+		@if $height != null {
+			@include breakpoint-option($name, height, $height);
+		}
+	} @else {
+		@error "breakpoint() expects parameters 2 and 3 to be numbers or autos";
+	}
+}
+
+/// @group Core
+///
+/// @parameter {arglist} $args...
+///
+/// @requires {function} breakpoint-groups
+/// @requires {function} breakpoint-option
+/// @requires {function} breakpoints
+/// @requires {mixin} breakpoint-group-option
+/// @requires {mixin} breakpoint-option
+///
+/// @throws breakpoint-group() expects at least 2 parameters, #{$argc} given
+/// @throws breakpoint-group() expects parameter 1 to be a string, #{$name-type} given
+/// @throws breakpoint-group() expects parameter 1 to be a unique string, #{$name} is an existing breakpoint
+/// @throws breakpoint-group() expects parameter 1 to be a unique string, #{$name} is an existing breakpoint group
+/// @throws breakpoint-group() expects parameter 2 to be a list of strings, #{$breakpoint-names-type} given
+/// @throws breakpoint-group() expects parameter 2 to be a list of strings
+/// @throws breakpoint-group() expects all breakpoints to have dimensions
+/// @throws breakpoint-group() expects breakpoints' media queries match
+@mixin breakpoint-group($args...) {
+	$argc: length($args);
+
+	@if $argc < 2 {
+		@error "breakpoint-group() expects at least 2 parameters, #{$argc} given";
+	}
+	$name: nth($args, 1);
+	$name-type: type-of($name);
+
+	@if $name-type != string {
+		@error "breakpoint-group() expects parameter 1 to be a string, #{$name-type} given";
+	}
+	$breakpoints: breakpoints();
+
+	@if map-has-key($breakpoints, $name) {
+		@error "breakpoint-group() expects parameter 1 to be a unique string, #{$name} is an existing breakpoint";
+	}
+	$breakpoint-groups: breakpoint-groups();
+
+	@if map-has-key($breakpoint-groups, $name) {
+		@error "breakpoint-group() expects parameter 1 to be a unique string, #{$name} is an existing breakpoint group";
+	}
+	$breakpoint-names: nth($args, 2);
+	$breakpoint-names-type: type-of($breakpoint-names);
+
+	@if $breakpoint-names-type != list {
+		@error "breakpoint-group() expects parameter 2 to be a list of strings, #{$breakpoint-names-type} given";
+	}
+	$media-query: ();
+
+	@if $argc > 2 {
+		$media-query: nth($args, 3);
+
+		@if $breakpoint-names-type != list {
+			@error "breakpoint-group() expects parameter 2 to be a list of strings, #{$breakpoint-names-type} given";
+		}
+	}
+	$type: null;
+	$breakpoint-media-query: null;
+
+	@each $breakpoint-name in $breakpoint-names {
+		@if type-of($breakpoint-name) != string {
+			@error "breakpoint-group() expects parameter 2 to be a list of strings";
+		}
+		$new-type: breakpoint-option($breakpoint-name, type);
+
+		@if $type == null {
+			$type: $new-type;
+		} @elseif $new-type != $type {
+			@error "breakpoint-group() expects all breakpoints to have dimensions";
+		}
+		$new-media-query: breakpoint-option($breakpoint-name, media-query, ());
+
+		@if $breakpoint-media-query == null {
+			$breakpoint-media-query: $new-media-query;
+		} @elseif $type == dimensions and $new-media-query != $breakpoint-media-query {
+			@error "breakpoint-group() expects breakpoints' media queries match";
+		}
+		@if not breakpoint-option($breakpoint-name, default-group) {
+			@include breakpoint-option($breakpoint-name, default-group, $name);
+		}
+	}
+	@include breakpoint-group-option($name, type, $type);
+	@include breakpoint-group-option($name, names, $breakpoint-names);
+	@include breakpoint-group-option($name, media-query, $media-query);
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {function} breakpoint-option
+@function breakpoint-text($name) {
+	@return breakpoint-option($name, text);
+}
+
+/// @group Core
+///
+/// @parameter $name
+/// @parameter $text
+///
+/// @requires {mixin} breakpoint-option
+@mixin breakpoint-text($name, $text) {
+	@include breakpoint-option($name, text, $text);
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {function} breakpoint-option
+@function breakpoint-postfix($name) {
+	@return breakpoint-option($name, postfix);
+}
+
+/// @group Core
+///
+/// @parameter $name
+/// @parameter $postfix
+///
+/// @requires {mixin} breakpoint-option
+@mixin breakpoint-postfix($name, $postfix) {
+	@include breakpoint-option($name, postfix, $postfix);
+}
+
+/// @group Core
+///
+/// @parameter $breakpoint-groups
+///
+/// @requires {mixin} _set
+@mixin breakpoint-groups($breakpoint-groups) {
+	@include _set(breakpoint-groups, $breakpoint-groups);
+}
+
+/// @group Core
+///
+/// @requires {function} breakpoints
+@function breakpoint-names() {
+	@return map-keys(breakpoints());
+}
+
+/// @group Core
+///
+/// @requires {function} breakpoint-groups
+@function breakpoint-group-names() {
+	@return map-keys(breakpoint-groups());
+}
+
+/// @group Core
+///
+/// @requires {function} _get
+@function breakpoint-groups() {
+	@return _get(breakpoint-groups, ());
+}
+
+/// @group Core
+///
+/// @parameter $breakpoints
+///
+/// @requires {mixin} _set
+@mixin breakpoints($breakpoints) {
+	@include _set(breakpoints, $breakpoints);
+}
+
+/// @group Core
+///
+/// @parameter $names
+///
+/// @requires {function} breakpoint-group-option
+/// @requires {function} breakpoint-option
+/// @requires {function} is-breakpoint
+/// @requires {function} is-breakpoint-group
+/// @requires {function} list-intersect
+/// @requires {function} parse-names
+///
+/// @throws parse-names() expects a valid group name, #{$group-name} given
+/// @throws parse-names() expects a breakpoint group or a group name, #{$name} given
+@function parse-names($names) {
+	@if type-of($names) == map {
+		$new-names: ();
+		$new-names: append($new-names, $names);
+		$names: $new-names;
+	}
+	$grouped: ();
+	$group-names: ();
+	$current-group: null;
+
+	@each $name in $names {
+		$save: $current-group != null and (is-breakpoint($name) == false or breakpoint-option($name, default-group) != $current-group);
+
+		@if $save {
+			$grouped: append($grouped, ($current-group: list-intersect(breakpoint-group-option($current-group, names, ()), $group-names)));
+			$current-group: null;
+			$group-names: ();
+		}
+		@if type-of($name) == map {
+			@each $group-name, $breakpoint-names in $name {
+				@if not is-breakpoint-group($group-name) {
+					@error "parse-names() expects a valid group name, #{$group-name} given";
+				}
+				$grouped: append($grouped, ($group-name: $breakpoint-names));
+			}
+		} @else if is-breakpoint($name) {
+			$group: breakpoint-option($name, default-group);
+
+			@if $group == null {
+				$grouped: append($grouped, ($name: true));
+			} @else {
+				$current-group: $group;
+				$group-names: append($group-names, $name);
+			}
+		} @else if is-breakpoint-group($name) {
+			$grouped: append($grouped, ($name: breakpoint-group-option($name, names, ())));
+		} @else {
+			@error "parse-names() expects a breakpoint group or a group name, #{$name} given";
+		}
+	}
+	@if $current-group != null {
+		$grouped: append($grouped, ($current-group: list-intersect(breakpoint-group-option($current-group, names, ()), $group-names)));
+		$current-group: null;
+		$group-names: ();
+	}
+	@return $grouped;
+}
+
+/// @group Core
+///
+/// @parameter $names
+///
+/// @requires {function} breakpoints
+/// @requires {function} map-set
+@function breakpoints-by-names($names) {
+	$return-breakpoints: ();
+	$breakpoints: breakpoints();
+
+	@each $name, $options in $breakpoints {
+		@if index($names, $name) != null {
+			$return-breakpoints: map-set($return-breakpoints, $name, $options);
+		}
+	}
+	@return $return-breakpoints;
+}
+
+/// @group Core
+///
+/// @parameter $group-name
+///
+/// @requires {function} breakpoint-group-option
+/// @requires {function} breakpoints
+/// @requires {function} map-set
+@function breakpoints-by-group($group-name) {
+	$return-breakpoints: ();
+	$breakpoints: breakpoints();
+	$group-names: breakpoint-group-option($group-name, names, ());
+
+	@each $name, $options in $breakpoints {
+		@if index($group-names, $name) != null {
+			$return-breakpoints: map-set($return-breakpoints, $name, $options);
+		}
+	}
+	@return $return-breakpoints;
+}
+
+/// @group Core
+///
+/// @requires {function} _get
+@function breakpoints() {
+	@return _get(breakpoints, ());
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {mixin} _set
+@mixin current-breakpoint($name) {
+	@include _set(current-breakpoint, $name);
+}
+
+/// @group Core
+///
+/// @parameter $list
+///
+/// @requires {function} is-breakpoint
+@function contains-breakpoint($list) {
+	@each $name in $list {
+		@if type-of($name) == map {
+			@each $key, $value in $name {
+				@if is-breakpoint($key) {
+					@return true;
+				}
+			}
+		}
+		@if is-breakpoint($name) {
+			@return true;
+		}
+	}
+	@return false;
+}
+
+/// @group Core
+///
+/// @parameter $list
+///
+/// @requires {function} is-breakpoint-group
+@function contains-breakpoint-group($list) {
+	@each $name in $list {
+		@if type-of($name) == map {
+			@each $key, $value in $name {
+				@if is-breakpoint-group($key) {
+					@return true;
+				}
+			}
+		}
+		@if is-breakpoint-group($name) {
+			@return true;
+		}
+	}
+	@return false;
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {function} breakpoint-group-names
+@function is-breakpoint-group($name) {
+	@return index(breakpoint-group-names(), $name) != null;
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {function} breakpoint-names
+@function is-breakpoint($name) {
+	@return index(breakpoint-names(), $name) != null;
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {function} is-breakpoint
+/// @requires {function} is-breakpoint-group
+@function is-breakpoint-or-group($name) {
+	@return is-breakpoint($name) or is-breakpoint-group($name);
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {function} fallback-breakpoint
+/// @requires {function} is-breakpoint
+/// @requires {mixin} _set
+///
+/// @throws fallback-breakpoint() expects a name of breakpoint, #{$name} given
+@mixin fallback-breakpoint($name) {
+	@if not is-breakpoint($name) {
+		@error "fallback-breakpoint() expects a name of breakpoint, #{$name} given";
+	}
+	@include _set(fallback-breakpoint, $name);
+}
+
+/// @group Core
+///
+/// @requires {function} _get
+@function fallback-breakpoint() {
+	@return _get(fallback-breakpoint);
+}
+
+/// @group Core
+///
+/// @parameter $direction
+///
+/// @requires {function} default-direction
+/// @requires {function} is-direction
+/// @requires {mixin} _set
+///
+/// @throws default-direction() expects parameter 1 to be a direction, #{$direction} given
+@mixin default-direction($direction) {
+	@if not is-direction($direction) {
+		@error "default-direction() expects parameter 1 to be a direction, #{$direction} given";
+	}
+	@include _set(default-direction, $direction);
+}
+
+/// @group Core
+///
+/// @requires {function} _get
+@function default-direction() {
+	@return _get(default-direction);
+}
+
+/// @group Core
+///
+/// @parameter $name
+///
+/// @requires {function} default-breakpoint
+/// @requires {function} is-breakpoint-or-group
+/// @requires {mixin} _set
+///
+/// @throws default-breakpoint() expects a name of breakpoint or breakpoint group, #{$name} given
+@mixin default-breakpoint($name) {
+	@if not is-breakpoint-or-group($name) {
+		@error "default-breakpoint() expects a name of breakpoint or breakpoint group, #{$name} given";
+	}
+	@include _set(default-breakpoint, $name);
+}
+
+/// @group Core
+///
+/// @requires {function} _get
+@function default-breakpoint() {
+	@return _get(default-breakpoint);
+}
+
+/// @group Core
+///
+/// @requires {function} _get
+@function current-breakpoint() {
+	@return _get(current-breakpoint);
+}
+
+@mixin root() {
+	@at-root (without: media) {
+		& {
+			@content;
+		}
+	}
+}
+
+@mixin root-block() {
+	@at-root (without: media) {
+		@content;
+	}
+}
+
+@mixin media-root() {
+	@at-root (with: media) {
+		& {
+			@content;
+		}
+	}
+}
+
+@mixin media-root-block() {
+	@at-root (with: media) {
+		@content;
+	}
+}
+
+@mixin real-root-block() {
+	@at-root (without: all) {
+		@content;
+	}
+}
+
+/// @group Core
+///
+/// @requires {function} str-replace
+@mixin like {
+	$selector: str-replace("" + &, ".", "");
+
+	@include media-root-block {
+		[class^="#{$selector}"],
+		[class*=" #{$selector}"] {
+			@content;
+		}
+	}
+}
+
+/// @group Core
+///
+/// @parameter $selector
+/// @parameter $n
+/// @parameter $postfix
+@function add-postfix-at($selector, $n, $postfix) {
+	@return str-slice($selector, 1, $n - 1) + str-slice($selector, $n, $n) + $postfix + str-slice($selector, $n + 1);
+}
+
+/// @group Core
+///
+/// @parameter $selectors
+/// @parameter $postfix
+/// @parameter {boolean} $first-only [true]
+/// @parameter {string} $matches ["." "%"]
+///
+/// @requires {function} add-postfix-at
+/// @requires {function} list-reverse
+/// @requires {function} list-to-string
+@function postfix-selectors($selectors, $postfix, $first-only: true, $matches: "." "%") {
+	$new-selectors: ();
+	$postfix-length: length($postfix);
+
+	@each $selector in $selectors {
+		$selector: list-reverse($selector);
+		$new-selector: ();
+		$loop: true;
+
+		@each $part in $selector {
+			@if $loop {
+				$started: 0;
+				$reset-chars: ":" "~" ">" " " "+" "[" "*" "#" ".";
+				$add-prefix: false;
+				$part-length: str-length($part);
+				$n: $part-length;
+
+				@while $n >= 1 and $loop == true {
+					$char: str-slice($part, $n, $n);
+
+					@if index($matches, $char) != null and $started > 0 {
+						$part: add-postfix-at($part, $started, $postfix);
+						$started: 0;
+
+						@if $first-only {
+							$loop: false;
+						}
+					}
+					@if $started > 0 and index($reset-chars, $char) != null {
+						$started: 0;
+					}
+					@if $started == 0 and index($reset-chars, $char) == null {
+						$started: $n;
+					}
+					$n: $n - 1;
+				}
+			}
+			$new-selector: append($new-selector, $part);
+		}
+		$new-selectors: append($new-selectors, list-to-string(list-reverse($new-selector), " "));
+	}
+	@return list-to-string($new-selectors, ", ");
+}
+
+/// @group Core
+///
+/// @parameter $string
+///
+/// @requires {function} char-at
+@function is-placeholder($string) {
+	$string: "" + $string;
+	@return length($string) > 0 and char-at($string, 1) == "%";
+}
+
+/// @group Core
+///
+/// @requires {function} breakpoint-postfix
+/// @requires {function} current-breakpoint
+/// @requires {function} str-replace
+@mixin targeted() {
+	$breakpoint: current-breakpoint();
+
+	@if $breakpoint {
+		@include media-root-block {
+			$postfix: breakpoint-postfix($breakpoint);
+			$selector: str-replace("#{&}", "-" + $postfix + "-", "-") + "-" + $postfix;
+
+			#{$selector} {
+				@content;
+			}
+		}
+	} @else {
+		@include media-root {
+			@content;
+		}
+	}
+}
+
+/// @group Core
+///
+/// @parameter $names [()]
+/// @parameter $direction [null]
+/// @parameter {boolean} $first-only [true]
+/// @parameter {string} $fallback [fallback-breakpoint()]
+///
+/// @requires {function} breakpoint-postfix
+/// @requires {function} breakpoints
+/// @requires {function} current-breakpoint
+/// @requires {function} default-direction
+/// @requires {function} fallback-breakpoint
+/// @requires {function} on
+/// @requires {function} postfix-selectors
+/// @requires {mixin} on
+///
+/// @throws target() does not accept parameter 1 when called inside on()
+@mixin target($names: (), $direction: null, $first-only: true, $fallback: fallback-breakpoint()) {
+	$direction: if($direction == null, default-direction(), $direction);
+	$breakpoints: breakpoints();
+	$current-breakpoint: current-breakpoint();
+	$is-null: (length($names) == 0 or $names == null);
+
+	@if $is-null == false and $current-breakpoint != null {
+		@error "target() does not accept parameter 1 when called inside on()";
+	} @elseif $is-null and $current-breakpoint != null {
+		$postfix: breakpoint-postfix($current-breakpoint);
+		$selector: postfix-selectors(&, "-#{$postfix}", $first-only);
+		
+		#{$selector} {
+			@content;
+		}
+	} @else {
+		@include on($names, $direction, $fallback: $fallback) {
+			$breakpoint: current-breakpoint();
+			$postfix: breakpoint-postfix($breakpoint);
+			$selector: postfix-selectors(&, "-#{$postfix}", $first-only);
+
+			@include media-root-block {
+				#{$selector} {
+					@content;
+				}
+			}
+		}
+	}
+}
+
+/// @group Core
+///
+/// @parameter $names [()]
+/// @parameter $direction [null]
+/// @parameter $media-query [()]
+/// @parameter {string} $fallback [fallback-breakpoint()]
+///
+/// @requires {function} breakpoint-group-option
+/// @requires {function} breakpoint-option
+/// @requires {function} breakpoints-by-names
+/// @requires {function} default-breakpoint
+/// @requires {function} default-direction
+/// @requires {function} fallback-breakpoint
+/// @requires {function} is-breakpoint
+/// @requires {function} list-contains
+/// @requires {function} map-nth-key
+/// @requires {function} map-nth-value
+/// @requires {function} map-reverse
+/// @requires {function} map-sort
+/// @requires {function} multi-map-column
+/// @requires {function} on
+/// @requires {function} parse-names
+/// @requires {mixin} current-breakpoint
+/// @requires {mixin} media-query
+///
+/// @throws on() expects parameter 2 to be a direction, #{$direction} given.
+@mixin on($names: (), $direction: null, $media-query: (), $fallback: fallback-breakpoint()) {
+	$original-media-query: $media-query;
+	$direction: if($direction == null, default-direction(), $direction);
+	$names-count: length($names);
+	$has-media-query: length($media-query) != 0;
+	$default-breakpoint: default-breakpoint();
+
+	@if $names-count == 0 {
+		$names: append($names, $default-breakpoint);
+		$names-count: length($names);
+	}
+	$parsed: parse-names($names);
+
+	@each $options in $parsed {
+		$names: map-nth-key($options, 1);
+		$name-list: map-nth-value($options, 1);
+			
+		@if $name-list == true or breakpoint-group-option($names, type) != dimensions {
+			@if $name-list == true {
+				$new-name-list: ();
+				$new-name-list: append($new-name-list, $names);
+				$name-list: $new-name-list;
+			}
+
+			@each $name in $name-list {
+				@if is-breakpoint($name) {
+					@include current-breakpoint($name);
+					$breakpoint-type: breakpoint-option($name, type);
+
+					@if $has-media-query == false and $name == $fallback {
+						@content;
+					} 
+					@if $breakpoint-type == dimensions {
+						@if $direction == left {
+			 				$max-width: breakpoint-option($name, width);
+							$max-height: breakpoint-option($name, height);
+							$media-query: $original-media-query;
+
+			 				@if $max-width != null and $max-width != auto {
+				 				$media-query: append($media-query, (max-width $max-width));
+				 			}
+					 		@if $max-height != null and $max-height != auto {
+					 			$media-query: append($media-query, (max-height $max-height));
+					 		}
+				 			@include current-breakpoint($name);
+				 			@include media-query($media-query) {
+				 				@content;
+				 			}
+				 			@include current-breakpoint(null);
+						} @elseif $direction == right {
+			 				$max-width: breakpoint-option($name, width);
+							$max-height: breakpoint-option($name, height);
+							$media-query: $original-media-query;
+
+			 				@if $max-width != null and $max-width != auto {
+				 				$media-query: append($media-query, (min-width $max-width));
+				 			}
+					 		@if $max-height != null and $max-height != auto {
+					 			$media-query: append($media-query, (min-height $max-height));
+					 		}
+				 			@include current-breakpoint($name);
+				 			@include media-query($media-query) {
+				 				@content;
+				 			}
+				 			@include current-breakpoint(null);
+						}
+					} @else {
+						$media-query: join($original-media-query, breakpoint-option($name, media-query));
+
+						@include media-query($media-query) {
+							@content;
+						}
+					}
+					@include current-breakpoint(null);
+				}
+			}
+		} @else {
+			$breakpoints: breakpoints-by-names(breakpoint-group-option($names, names));
+			$breakpoints-values: map-values($breakpoints);
+			$widths: map-sort(multi-map-column($breakpoints-values, width, name));
+			$width-count: length($widths);
+			$heights: map-sort(multi-map-column($breakpoints-values, height, name));
+			$height-count: length($heights);
+
+			@if $has-media-query == false and list-contains($name-list, $fallback) {
+				@include current-breakpoint($fallback);
+				@content;
+				@include current-breakpoint(null);
+			}
+			@if $direction == left {
+				$widths: map-reverse($widths);
+
+				@for $n from 1 through $width-count {
+					$name: map-nth-key($widths, $n);
+
+					@if index($name-list, $name) {
+						$max-width: map-nth-value($widths, $n);
+						$max-height: map-get($heights, $name);
+						$media-query: $original-media-query;
+
+						@if $max-width != null and $max-width != auto {
+							$media-query: append($media-query, (max-width $max-width));
+						}
+						@if $max-height != null and $max-height != auto {
+							$media-query: append($media-query, (max-height $max-height));
+						}
+						@include current-breakpoint($name);
+						@include media-query($media-query) {
+							@content;
+						}
+						@include current-breakpoint(null);
+					}
+				}
+			} @elseif $direction == right {
+				@for $n from 1 through $width-count {
+					$name: map-nth-key($widths, $n);
+					
+					@if index($name-list, $name) {
+						$min-width: if($n == 1, 0, map-nth-value($widths, $n - 1));
+						$max-height: map-get($heights, $name);
+						$media-query: $original-media-query;
+
+						@if $min-width != null and $min-width != auto {
+							$media-query: append($media-query, (min-width $min-width));
+						}
+						@if $max-height != null and $max-height != auto {
+							$media-query: append($media-query, (max-height $max-height));
+						}
+						@include current-breakpoint($name);
+						@include media-query($media-query) {
+							@content;
+						}
+						@include current-breakpoint(null);
+					}
+				}
+			} @elseif $direction == up {
+				$heights: map-reverse($heights);
+
+				@for $n from 1 through $height-count {
+					$name: map-nth-key($heights, $n);
+					
+					@if index($name-list, $name) {
+						$max-height: map-nth-value($heights, $n);
+						$max-width: map-get($widths, $name);
+						$media-query: $original-media-query;
+
+						@if $max-width != null and $max-width != auto {
+							$media-query: append($media-query, (max-width $max-width));
+						}
+						@if $max-height != null and $max-height != auto {
+							$media-query: append($media-query, (max-height $max-height));
+						}
+						@include current-breakpoint($name);
+						@include media-query($media-query) {
+							@content;
+						}
+						@include current-breakpoint(null);
+					}
+				}
+			} @elseif $direction == down {
+				@for $n from 1 through $height-count {
+					$name: map-nth-key($heights, $n);
+					
+					@if index($name-list, $name) {
+						$min-height: if($n == 1, none, map-nth-value($heights, $n - 1));
+						$max-width: map-get($widths, $name);
+						$media-query: $original-media-query;
+
+						@if $max-width != null and $max-width != auto {
+							$media-query: append($media-query, (max-width $max-width));
+						}
+						@if $min-height != null and $min-height != auto {
+							$media-query: append($media-query, (min-height $min-height));
+						}
+						@include current-breakpoint($name);
+						@include media-query($media-query) {
+							@content;
+						}
+						@include current-breakpoint(null);
+					}
+				}
+			} @else {
+				@error "on() expects parameter 2 to be a direction, #{$direction} given.";
+			}
+		}
+	}
+}
+
+/// @group Core
+///
+/// @requires {function} _get
+@function placeholders() {
+	@return _get(placeholders, ());
+}
+
+/// @group Core
+///
+/// @parameter $placeholders
+///
+/// @requires {mixin} _set
+@mixin placeholders($placeholders) {
+	@include _set(placeholders, $placeholders);
+}
+
+/// @group Core
+///
+/// @parameter $placeholder
+///
+/// @requires {function} placeholders
+@function placeholder-exists($placeholder) {
+	@return index(placeholders(), $placeholder) != null;
+}
+
+/// @group Core
+///
+/// @parameter $placeholder
+///
+/// @requires {function} _get
+/// @requires {function} media-query
+@mixin extend($placeholder) {
+	@if media-query() {
+		$media-query-id: _get(media-query-id);
+		$placeholder: "#{$placeholder}-#{$media-query-id}";
+		@extend %#{$placeholder} !optional;
+	} @else {
+		@extend %#{$placeholder} !optional;
+	}
+}
+
+/// @group Core
+///
+/// @parameter $placeholder
+///
+/// @requires {function} _get
+/// @requires {function} media-query
+/// @requires {function} placeholder-exists
+/// @requires {function} placeholders
+/// @requires {mixin} placeholders
+@mixin placeholder($placeholder) {
+	$placeholders: placeholders();
+
+	@if media-query() {
+		$media-query-id: _get(media-query-id);
+		$placeholder: "#{$placeholder}-#{$media-query-id}";
+	}
+	@if not placeholder-exists($placeholder) {
+		@include placeholders(append($placeholders, $placeholder));
+
+		@if media-query() {
+			@include media-root-block {
+				%#{$placeholder} {
+					@content;
+				}
+			}
+		} @else {
+			@include real-root-block {
+				%#{$placeholder} {
+					@content;
+				}
+			}
+		}
+	}
+}

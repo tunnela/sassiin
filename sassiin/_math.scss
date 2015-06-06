@@ -17,11 +17,11 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 ///
 /// @requires {function} list-contains
 @function is-bitwise-operator($operator) {
-	@return list-contains($bitwise-operators, $operator);
+  @return list-contains($bitwise-operators, $operator);
 }
 
 @function operators() {
-	@return "+" "-" "*" "/";
+  @return "+" "-" "*" "/";
 }
 
 /// @group Math
@@ -31,15 +31,15 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 /// @requires {function} list-contains
 /// @requires {function} operators
 @function is-operator($operator) {
-	@return list-contains(operators(), $operator);
+  @return list-contains(operators(), $operator);
 }
 
 @function value($number) {
-	@return $number / ($number * 0 + 1);
+  @return $number / ($number * 0 + 1);
 }
 
 @function unitless($number) {
-	@return $number / ($number * 0 + 1);
+  @return $number / ($number * 0 + 1);
 }
 
 /// @group Math
@@ -54,42 +54,42 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 /// @throws math() expects parameter 2 to be an operator, #{$operator-type} given
 /// @throws math() expects parameter 3 to be a number, #{$other-type} given
 @function math($args...) {
-	$argc: length($args);
+  $argc: length($args);
 
-	@if $argc <= 1 or $argc > 3 {
-		@error "math() expects 2 to 3 parameters, #{$argc} given";
-	}
-	$value: nth($args, 1);
-	$value-type: type-of($value);
+  @if $argc <= 1 or $argc > 3 {
+    @error "math() expects 2 to 3 parameters, #{$argc} given";
+  }
+  $value: nth($args, 1);
+  $value-type: type-of($value);
 
-	@if $value-type != number {
-		@error "math() expects parameter 1 to be a number, #{$value-type} given";
-	}
-	$operator: nth($args, 2);
-	$operator-type: type-of($operator);
-	
-	@if not is-operator($operator) {
-		@error "math() expects parameter 2 to be an operator, #{$operator-type} given";
-	}
-	$other: 1;
+  @if $value-type != number {
+    @error "math() expects parameter 1 to be a number, #{$value-type} given";
+  }
+  $operator: nth($args, 2);
+  $operator-type: type-of($operator);
+  
+  @if not is-operator($operator) {
+    @error "math() expects parameter 2 to be an operator, #{$operator-type} given";
+  }
+  $other: 1;
 
-	@if $argc == 3 {
-		$other: nth($args, 3);
-		$other-type: type-of($value);
+  @if $argc == 3 {
+    $other: nth($args, 3);
+    $other-type: type-of($value);
 
-		@if $other-type != number {
-			@error "math() expects parameter 3 to be a number, #{$other-type} given";
-		}
-	}
-	@if $operator == "+" {
-		@return $value + $other;
-	} @elseif $operator == "-" {
-		@return $value - $other;
-	} @elseif $operator == "*" {
-		@return $value * $other;
-	} @elseif $operator == "/" {
-		@return $value / $other;
-	}
+    @if $other-type != number {
+      @error "math() expects parameter 3 to be a number, #{$other-type} given";
+    }
+  }
+  @if $operator == "+" {
+    @return $value + $other;
+  } @elseif $operator == "-" {
+    @return $value - $other;
+  } @elseif $operator == "*" {
+    @return $value * $other;
+  } @elseif $operator == "/" {
+    @return $value / $other;
+  }
 }
 
 /// @group Math
@@ -100,12 +100,12 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 ///
 /// @throws math() expects parameter 1 to be a number, #{$value-type} given
 @function increment($value) {
-	$value-type: type-of($value);
+  $value-type: type-of($value);
 
-	@if $value-type != number {
-		@error "math() expects parameter 1 to be a number, #{$value-type} given";
-	}
-	@return math($valuem, "+");
+  @if $value-type != number {
+    @error "math() expects parameter 1 to be a number, #{$value-type} given";
+  }
+  @return math($valuem, "+");
 }
 
 /// @group Math
@@ -116,41 +116,41 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 ///
 /// @throws math() expects parameter 1 to be a number, #{$value-type} given
 @function decrement($value) {
-	$value-type: type-of($value);
+  $value-type: type-of($value);
 
-	@if $value-type != number {
-		@error "math() expects parameter 1 to be a number, #{$value-type} given";
-	}
-	@return math($valuem, "-");
+  @if $value-type != number {
+    @error "math() expects parameter 1 to be a number, #{$value-type} given";
+  }
+  @return math($valuem, "-");
 }
 
 @function num-compare($left, $right) {
-	@if $left < $right {
-		@return -1;
-	}
-	@if $left > $right {
-		@return 1;
-	}
-	@return 0;
+  @if $left < $right {
+    @return -1;
+  }
+  @if $left > $right {
+    @return 1;
+  }
+  @return 0;
 }
 
 @function max($x, $y) {
-	@if $x < $y {
-		@return $y;
-	}
-	@return $x;
+  @if $x < $y {
+    @return $y;
+  }
+  @return $x;
 }
 
 @function min($x, $y) {
-	@if $y < $x {
-		@return $y;
-	}
-	@return $x;
+  @if $y < $x {
+    @return $y;
+  }
+  @return $x;
 }
 
 @function abs($x) {
-	@if $x < 0 { $x: -$x; }
-	@return $x;
+  @if $x < 0 { $x: -$x; }
+  @return $x;
 }
 
 /// @group Math
@@ -158,7 +158,7 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 /// @parameter $a
 /// @parameter $n
 @function mod($a, $n) {
-	@return $a - (floor($a / $n) * $n);
+  @return $a - (floor($a / $n) * $n);
 }
 
 /// @group Math
@@ -167,7 +167,7 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 ///
 /// @requires {function} mod
 @function odd($a) {
-	@return mod($a, 2) > 0;
+  @return mod($a, 2) > 0;
 }
 
 /// @group Math
@@ -176,42 +176,42 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 ///
 /// @requires {function} mod
 @function even($a) {
-	@return mod($a, 2) == 0;
+  @return mod($a, 2) == 0;
 }
 
-// http://en.wikipedia.org/wiki/Exponentiation
 /// @group Math
 ///
 /// @parameter $base
 /// @parameter {number} $power [2]
+/// 
+/// @link http://en.wikipedia.org/wiki/Exponentiation
 @function powi($base, $power: 2) {
-	@if $power == 0 { @return 1; } 
+  @if $power == 0 { @return 1; } 
 
-	$result: 1;
-	$negative: $power < 0;
-	$from: if($negative, $power, 1);
-	$through: if($negative, -1, $power);
-	
-	@for $i from $from through $through { 
-		$result: $result * $base; 
-	}
-	@if $negative { @return 1 / $result; }
-	@return $result;
+  $result: 1;
+  $negative: $power < 0;
+  $from: if($negative, $power, 1);
+  $through: if($negative, -1, $power);
+  
+  @for $i from $from through $through { 
+    $result: $result * $base; 
+  }
+  @if $negative { @return 1 / $result; }
+  @return $result;
 }
 
-// http://en.wikipedia.org/wiki/Factorial
+/// @link http://en.wikipedia.org/wiki/Factorial
 @function factorial($n) {
-	@if $n == 0 { @return 1; }
+  @if $n == 0 { @return 1; }
 
-	$result: 1;
+  $result: 1;
 
-	@for $i from 1 through $n {
-		$result: $result * $i;
-	}
-	@return $result;
+  @for $i from 1 through $n {
+    $result: $result * $i;
+  }
+  @return $result;
 }
 
-// http://en.wikipedia.org/wiki/Exponentiation
 /// @group Math
 ///
 /// @parameter $base
@@ -219,12 +219,13 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 ///
 /// @requires {function} exp
 /// @requires {function} ln
+/// 
+/// @link http://en.wikipedia.org/wiki/Exponentiation
 @function pow($base, $power: 2) {
-	@if $power == 0 { @return 1; }
-	@return exp($power * ln($base));
+  @if $power == 0 { @return 1; }
+  @return exp($power * ln($base));
 }
 
-// http://en.wikipedia.org/wiki/Trigonometric_functions
 /// @group Math
 ///
 /// @parameter $x
@@ -232,19 +233,20 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 /// @requires {function} even
 /// @requires {function} factorial
 /// @requires {function} powi
+/// 
+/// @link http://en.wikipedia.org/wiki/Trigonometric_functions
 @function cos($x) {
-	$r: 0;
+  $r: 0;
 
-	@for $i from 1 through 100 {
-		$n: $i * 2 - 2;
-		$m: 1;
-		@if even($i) { $m: -1; }
-		$r: $r + $m * (powi($x, $n) / factorial($n));
-	}
-	@return $r;
+  @for $i from 1 through 100 {
+    $n: $i * 2 - 2;
+    $m: 1;
+    @if even($i) { $m: -1; }
+    $r: $r + $m * (powi($x, $n) / factorial($n));
+  }
+  @return $r;
 }
 
-// http://en.wikipedia.org/wiki/Trigonometric_functions
 /// @group Math
 ///
 /// @parameter $x
@@ -252,35 +254,37 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 /// @requires {function} even
 /// @requires {function} factorial
 /// @requires {function} powi
+/// 
+/// @link http://en.wikipedia.org/wiki/Trigonometric_functions
 @function sin($x) {
-	$r: 0;
+  $r: 0;
 
-	@for $i from 1 through 100 {
-		$n: $i * 2 - 1;
-		$m: 1;
-		@if even($i) { $m: -1; }
-		$r: $r + $m * (powi($x, $n) / factorial($n));
-	}
-	@return $r;
+  @for $i from 1 through 100 {
+    $n: $i * 2 - 1;
+    $m: 1;
+    @if even($i) { $m: -1; }
+    $r: $r + $m * (powi($x, $n) / factorial($n));
+  }
+  @return $r;
 }
 
-// http://en.wikipedia.org/wiki/Exponential_function
 /// @group Math
 ///
 /// @parameter $x
 ///
 /// @requires {function} factorial
 /// @requires {function} powi
+/// 
+/// @link http://en.wikipedia.org/wiki/Exponential_function
 @function exp($x) {
-	$r: 0;
+  $r: 0;
 
-	@for $i from 0 through 100 {
-		$r: $r + (powi($x, $i) / factorial($i));
-	}
-	@return $r;
+  @for $i from 0 through 100 {
+    $r: $r + (powi($x, $i) / factorial($i));
+  }
+  @return $r;
 }
 
-// http://en.wikipedia.org/wiki/Natural_logarithm
 /// @group Math
 ///
 /// @parameter $x
@@ -288,68 +292,36 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 /// @requires {function} abs
 /// @requires {function} even
 /// @requires {function} powi
+/// 
+/// @link http://en.wikipedia.org/wiki/Natural_logarithm
 @function ln($x) {
-	$r: 0;
+  $r: 0;
 
-	@if abs($x - 1) <= 1 {
-		@for $i from 1 through 100 {
-			$m: 1;
-			@if even($i) { $m: -1; }
-			$r: $r + $m * (powi($x - 1, $i) / $i);
-		}
-	} @elseif $x > 0.5 {
-		@for $i from 1 through 100 {
-			$r: $r + ((1 / $i) * powi(($x - 1) / $x, $i));
-		}
-	}
-	@return $r; 
+  @if abs($x - 1) <= 1 {
+    @for $i from 1 through 100 {
+      $m: 1;
+      @if even($i) { $m: -1; }
+      $r: $r + $m * (powi($x - 1, $i) / $i);
+    }
+  } @elseif $x > 0.5 {
+    @for $i from 1 through 100 {
+      $r: $r + ((1 / $i) * powi(($x - 1) / $x, $i));
+    }
+  }
+  @return $r; 
 }
 
-// http://en.wikipedia.org/wiki/Nth_root
 /// @group Math
 ///
 /// @parameter $a
 /// @parameter {number} $n [2]
 ///
 /// @requires {function} pow
+/// 
+/// http://en.wikipedia.org/wiki/Nth_root
 @function root($a, $n: 2) {
-	@return pow($a, 1 / $n);
+  @return pow($a, 1 / $n);
 }
-
-//@function mathematics($operations) {
-//	$argc: length($args);
-//	$break: false;
-	
-//	@each $operator in $operators {
-//			$index: index($operations, $operator);
-
-//			@if $index != null {
-			
-//			}
-//		}
-//	}
-//	$value-bin: dec-to-bin($value);
-//	$value-length: str-length($value-bin);
-//	$other-bin: dec-to-bin($other);
-//	$other-length: str-length($other-bin);
-
-//	@if $value-length > $other-length {
-//		$other-bin: str-pad($other-bin, $value-length, "0", left);
-//		$other-length: $value-length;
-//	} @else if $value-length < $other-length {
-//		$value-bin: str-pad($value-bin, $other-length, "0", left);
-//		$value-length: $other-length;
-//	}
-//	@if $operator == "|" {
-//		@return $value + $other;
-//	} @elseif $operator == "-" {
-//		@return $value - $other;
-//	} @elseif $operator == "*" {
-//		@return $value * $other;
-//	} @elseif $operator == "/" {
-//		@return $value / $other;
-//	}
-//}
 
 /// @group Math
 ///
@@ -359,16 +331,16 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 /// @requires {function} mod
 /// @requires {function} prepend
 @function dec-to-hex($number) {
-	$hex: ();
-	$quotient: 1;
+  $hex: ();
+  $quotient: 1;
 
-	@while $quotient != 0 {
-		$remainder: mod($number, 16);
-		$quotient: ($number - $remainder) / 16;
-		$hex: prepend($hex, nth($hex-numbers, $remainder + 1));
-		$number: $quotient;
-	}
-	@return list-to-string($hex);
+  @while $quotient != 0 {
+    $remainder: mod($number, 16);
+    $quotient: ($number - $remainder) / 16;
+    $hex: prepend($hex, nth($hex-numbers, $remainder + 1));
+    $number: $quotient;
+  }
+  @return list-to-string($hex);
 }
 
 /// @group Math
@@ -379,16 +351,16 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
 /// @requires {function} mod
 /// @requires {function} prepend
 @function dec-to-bin($number) {
-	$bin: ();
-	$quotient: 1;
+  $bin: ();
+  $quotient: 1;
 
-	@while $quotient != 0 {
-		$remainder: mod($number, 2);
-		$quotient: ($number - $remainder) / 2;
-		$bin: prepend($bin, nth($bin-numbers, $remainder + 1));
-		$number: $quotient;
-	}
-	@return list-to-string($bin);
+  @while $quotient != 0 {
+    $remainder: mod($number, 2);
+    $quotient: ($number - $remainder) / 2;
+    $bin: prepend($bin, nth($bin-numbers, $remainder + 1));
+    $number: $quotient;
+  }
+  @return list-to-string($bin);
 }
 
 $pi: 3.1415926535897932384626433832795028841971693993751;

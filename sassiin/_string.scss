@@ -26,24 +26,24 @@ $unicode-chars:
 ///
 /// @requires {function} str-repeat
 @function str-pad($string, $length, $pad-with: " ", $pad-type: right) {
-	$str-length: str-length($string);
+  $str-length: str-length($string);
 
-	@if $str-length >= $length {
-		@return $string;
-	}
-	$left: 0;
-	$right: 0;
+  @if $str-length >= $length {
+    @return $string;
+  }
+  $left: 0;
+  $right: 0;
 
-	@if $pad-type == left {
-		$left: $length - $str-length;
-	} @else if $pad-type == right {
-		$right: $length - $str-length;
-	} @else if $pad-type == both {
-		$both: ($length - $str-length);
-		$left: $both - floor($both / 2);
-		$right: $both - $left;
-	}
-	@return str-repeat($pad-with, $left) + $string + str-repeat($pad-with, $right);
+  @if $pad-type == left {
+    $left: $length - $str-length;
+  } @else if $pad-type == right {
+    $right: $length - $str-length;
+  } @else if $pad-type == both {
+    $both: ($length - $str-length);
+    $left: $both - floor($both / 2);
+    $right: $both - $left;
+  }
+  @return str-repeat($pad-with, $left) + $string + str-repeat($pad-with, $right);
 }
 
 /// @group String
@@ -55,23 +55,23 @@ $unicode-chars:
 /// @requires {function} str-replace
 /// @requires {function} types
 @function str-replace($string, $search, $replace: '') {
-	@if	types($string $search $replace) == (string string string) {
-		$index: str-index($string, $search);
+  @if types($string $search $replace) == (string string string) {
+    $index: str-index($string, $search);
 
-		@if $index {
-			@return str-slice($string, 1, $index - 1) + $replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace);
-		}
-		@return $string;
-	} @elseif types($string $search $replace) == (string list string) {
-		@for $i from 1 through length($search) {
-			$string: str-replace($string, nth($search, $i), $replace);
-		}
-	} @elseif types($string $search $replace) == (string list list) && length($search) == length($replace) {
-		@for $i from 1 through length($search) {
-			$string: str-replace($string, nth($search, $i), nth($replace, $i));
-		}
-	}
-	@return $string;
+    @if $index {
+      @return str-slice($string, 1, $index - 1) + $replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace);
+    }
+    @return $string;
+  } @elseif types($string $search $replace) == (string list string) {
+    @for $i from 1 through length($search) {
+      $string: str-replace($string, nth($search, $i), $replace);
+    }
+  } @elseif types($string $search $replace) == (string list list) && length($search) == length($replace) {
+    @for $i from 1 through length($search) {
+      $string: str-replace($string, nth($search, $i), nth($replace, $i));
+    }
+  }
+  @return $string;
 }
 
 /// @group String
@@ -81,7 +81,7 @@ $unicode-chars:
 ///
 /// @requires {function} str-replace
 @function slugify($str, $remove: (" " "." "_" "+" "~" "#" "(" ")" ":")) {
-	@return str-replace(str-replace($str, " ", ""), $remove, "-");
+  @return str-replace(str-replace($str, " ", ""), $remove, "-");
 }
 
 /// @group String
@@ -92,47 +92,47 @@ $unicode-chars:
 /// @requires {function} char-compare
 /// @requires {function} min
 @function str-compare($left, $right) {
-	$left: "" + $left;
-	$right: "" + $right;
-	$left-length: str-length($left);
-	$right-length: str-length($right);
-	$min-length: min($left-length, $right-length);
-	
-	@for $n from 1 through $min-length {
-		$compare: char-compare(str-slice($left, $n, $n), str-slice($right, $n, $n));
+  $left: "" + $left;
+  $right: "" + $right;
+  $left-length: str-length($left);
+  $right-length: str-length($right);
+  $min-length: min($left-length, $right-length);
+  
+  @for $n from 1 through $min-length {
+    $compare: char-compare(str-slice($left, $n, $n), str-slice($right, $n, $n));
 
-		@if $compare < 0 {
-			@return -1;
-		}
-		@if $compare > 0 {
-			@return 1;
-		}
-	}
-	@if $left-length < $right-length {
-		@return -1;
-	} @elseif $left-length > $right-length {
-		@return 1;
-	}
-	@return 0;
+    @if $compare < 0 {
+      @return -1;
+    }
+    @if $compare > 0 {
+      @return 1;
+    }
+  }
+  @if $left-length < $right-length {
+    @return -1;
+  } @elseif $left-length > $right-length {
+    @return 1;
+  }
+  @return 0;
 }
 
 @function str-repeat($str, $n) {
-	$repeated-str: "";
+  $repeated-str: "";
 
-	@for $i from 0 to $n {
-		$repeated-str: $repeated-str + $str;
-	}
-	@return $repeated-str;
+  @for $i from 0 to $n {
+    $repeated-str: $repeated-str + $str;
+  }
+  @return $repeated-str;
 }
 
 @function lowercase-alphabets() {
-	@return "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l"
-	"m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z";
+  @return "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l"
+  "m" "n" "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z";
 }
 
 @function uppercase-alphabets() {
-	@return "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" 
-	"M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z";
+  @return "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" 
+  "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z";
 }
 
 /// @group String
@@ -140,11 +140,11 @@ $unicode-chars:
 /// @requires {function} lowercase-alphabets
 /// @requires {function} uppercase-alphabets
 @function alphabets() {
-	@return join(lowercase-alphabets(), uppercase-alphabets());
+  @return join(lowercase-alphabets(), uppercase-alphabets());
 }
 
 @function numbers() {
-	@return "0" "1" "2" "3" "4" "5" "6" "7" "8" "9";
+  @return "0" "1" "2" "3" "4" "5" "6" "7" "8" "9";
 }
 
 /// @group String
@@ -152,7 +152,7 @@ $unicode-chars:
 /// @requires {function} alphabets
 /// @requires {function} numbers
 @function alphanumeric() {
-	@return join(numbers(), alphabets());
+  @return join(numbers(), alphabets());
 }
 
 /// @group String
@@ -162,28 +162,28 @@ $unicode-chars:
 ///
 /// @requires {function} alphanumeric
 @function char-compare($left, $right) {
-	$list: join(" ", alphanumeric());
+  $list: join(" ", alphanumeric());
 
-	$left: "" + $left;
-	$right: "" + $right;
-	$left-index: index($list, $left);
-	$right-index: index($list, $right);
+  $left: "" + $left;
+  $right: "" + $right;
+  $left-index: index($list, $left);
+  $right-index: index($list, $right);
 
-	@if not $left-index {
-		$left-index: length($list) + 1;
-	}
-	@if not $right-index {
-		$right-index: length($list) + 1;
-	}
-	@if $left-index == $right-index {
-		@return 0;
-	}
-	@if $left-index < $right-index {
-		@return -1;
-	}
-	@if $left-index > $right-index {
-		@return 1;
-	}
+  @if not $left-index {
+    $left-index: length($list) + 1;
+  }
+  @if not $right-index {
+    $right-index: length($list) + 1;
+  }
+  @if $left-index == $right-index {
+    @return 0;
+  }
+  @if $left-index < $right-index {
+    @return -1;
+  }
+  @if $left-index > $right-index {
+    @return 1;
+  }
 }
 
 /// @group String
@@ -195,24 +195,24 @@ $unicode-chars:
 /// @throws str-reverse() expects 1 parameter, #{$argc} given
 /// @throws str-reverse() expects parameter 1 to be a string, #{$str-type} given
 @function str-reverse($args...) {
-	$argc: length($args);
+  $argc: length($args);
 
-	@if $argc != 1 {
-		@error "str-reverse() expects 1 parameter, #{$argc} given";
-	}
-	$str: nth($args, 1);
-	$str-type: type-of($str);
+  @if $argc != 1 {
+    @error "str-reverse() expects 1 parameter, #{$argc} given";
+  }
+  $str: nth($args, 1);
+  $str-type: type-of($str);
 
-	@if $str-type != string {
-		@error "str-reverse() expects parameter 1 to be a string, #{$str-type} given";
-	}
-	$str-length: str-length($str);
-	$flipped-str: "";
+  @if $str-type != string {
+    @error "str-reverse() expects parameter 1 to be a string, #{$str-type} given";
+  }
+  $str-length: str-length($str);
+  $flipped-str: "";
 
-	@for $n from 1 through $str-length {
-		$flipped-str: str-slice($str, $n, $n) + $flipped-str;
-	}
-	@return $flipped-str;
+  @for $n from 1 through $str-length {
+    $flipped-str: str-slice($str, $n, $n) + $flipped-str;
+  }
+  @return $flipped-str;
 }
 
 /// @group String
@@ -225,24 +225,24 @@ $unicode-chars:
 /// @throws char-at() expects parameter 1 to be a string, #{$str-type} given
 /// @throws char-at() expects parameter 2 to be a number, #{$index-type} given
 @function char-at($args...) {
-	$argc: length($args);
+  $argc: length($args);
 
-	@if $argc != 2 {
-		@error "char-at() expects 2 parameters, #{$argc} given";
-	}
-	$str: nth($args, 1);
-	$str-type: type-of($str);
+  @if $argc != 2 {
+    @error "char-at() expects 2 parameters, #{$argc} given";
+  }
+  $str: nth($args, 1);
+  $str-type: type-of($str);
 
-	@if $str-type != string {
-		@error "char-at() expects parameter 1 to be a string, #{$str-type} given";
-	}
-	$index: nth($args, 2);
-	$index-type: type-of($index);
+  @if $str-type != string {
+    @error "char-at() expects parameter 1 to be a string, #{$str-type} given";
+  }
+  $index: nth($args, 2);
+  $index-type: type-of($index);
 
-	@if $index-type != number {
-		@error "char-at() expects parameter 2 to be a number, #{$index-type} given";
-	}
-	@return str-slice($str, $index, $index);
+  @if $index-type != number {
+    @error "char-at() expects parameter 2 to be a number, #{$index-type} given";
+  }
+  @return str-slice($str, $index, $index);
 }
 
 /// @group String
@@ -254,25 +254,25 @@ $unicode-chars:
 /// @throws char-code() expects only 1 parameter, #{$argc} given
 /// @throws char-code() expects parameter 1 to be a string, #{$char-type} given
 @function char-code($args...) {
-	$argc: length($args);
+  $argc: length($args);
 
-	@if $argc != 1 {
-		@error "char-code() expects only 1 parameter, #{$argc} given";
-	}
-	$char: nth($args, 1);
-	$char-type: type-of($char);
+  @if $argc != 1 {
+    @error "char-code() expects only 1 parameter, #{$argc} given";
+  }
+  $char: nth($args, 1);
+  $char-type: type-of($char);
 
-	@if $char-type != string {
-		@error "char-code() expects parameter 1 to be a string, #{$char-type} given";
-	}
-	@return index($unicode-chars, $char) - 1;
+  @if $char-type != string {
+    @error "char-code() expects parameter 1 to be a string, #{$char-type} given";
+  }
+  @return index($unicode-chars, $char) - 1;
 }
 
 /// @group String
 ///
 /// @parameter $str
 @function unicode($str) {
-	@return unquote("\"") + $str + unquote("\"");
+  @return unquote("\"") + $str + unquote("\"");
 }
 
 /// @group String
@@ -284,32 +284,32 @@ $unicode-chars:
 /// @requires {function} list-to-string
 /// @requires {function} variable-to-string
 @function variable-to-string($variable, $sub-list: false, $separator: " ") {
-	$str: "";
-	$type: type-of($variable);
-	$new-separator: if($separator == " ", ", ", " ");
+  $str: "";
+  $type: type-of($variable);
+  $new-separator: if($separator == " ", ", ", " ");
 
-	@if $type == list {
-		$items: ();
-		$str: if($sub-list, "(", ""); 
+  @if $type == list {
+    $items: ();
+    $str: if($sub-list, "(", ""); 
 
-		@each $item in $variable {
-			$items: append($items, variable-to-string($item, true));
-		}
-		$str: $str + list-to-string($items, $separator) + if($sub-list, ")", ""); 
-	} @elseif $type == map {
-		$items: ();
-		$str: "("; 
+    @each $item in $variable {
+      $items: append($items, variable-to-string($item, true));
+    }
+    $str: $str + list-to-string($items, $separator) + if($sub-list, ")", ""); 
+  } @elseif $type == map {
+    $items: ();
+    $str: "("; 
 
-		@each $key, $item in $variable {
-			$items: append($items, "" + variable-to-string($key) + ": " + variable-to-string($item));
-		}
-		$str: $str + list-to-string($items, $new-separator) + ")"; 
-	} @elseif $type == string {
-		$str: "\"" + $variable + "\"";
-	} @elseif $type == "null" {
-		$str: "null"; 
-	} @else {
-		$str: "" + $variable; 
-	}
-	@return $str;
+    @each $key, $item in $variable {
+      $items: append($items, "" + variable-to-string($key) + ": " + variable-to-string($item));
+    }
+    $str: $str + list-to-string($items, $new-separator) + ")"; 
+  } @elseif $type == string {
+    $str: "\"" + $variable + "\"";
+  } @elseif $type == "null" {
+    $str: "null"; 
+  } @else {
+    $str: "" + $variable; 
+  }
+  @return $str;
 }

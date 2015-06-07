@@ -20,6 +20,7 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
   @return list-contains($bitwise-operators, $operator);
 }
 
+/// @group Math
 @function operators() {
   @return "+" "-" "*" "/";
 }
@@ -34,10 +35,12 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
   @return list-contains(operators(), $operator);
 }
 
+/// @group Math
 @function value($number) {
   @return $number / ($number * 0 + 1);
 }
 
+/// @group Math
 @function unitless($number) {
   @return $number / ($number * 0 + 1);
 }
@@ -124,6 +127,7 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
   @return math($valuem, "-");
 }
 
+/// @group Math
 @function num-compare($left, $right) {
   @if $left < $right {
     @return -1;
@@ -134,6 +138,7 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
   @return 0;
 }
 
+/// @group Math
 @function max($x, $y) {
   @if $x < $y {
     @return $y;
@@ -141,6 +146,7 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
   @return $x;
 }
 
+/// @group Math
 @function min($x, $y) {
   @if $y < $x {
     @return $y;
@@ -148,6 +154,7 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
   @return $x;
 }
 
+/// @group Math
 @function abs($x) {
   @if $x < 0 { $x: -$x; }
   @return $x;
@@ -200,6 +207,7 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
   @return $result;
 }
 
+/// @group Math
 /// @link http://en.wikipedia.org/wiki/Factorial
 @function factorial($n) {
   @if $n == 0 { @return 1; }

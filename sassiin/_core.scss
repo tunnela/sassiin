@@ -398,6 +398,7 @@ $unique: unique-id();
   @return $types;
 }
 
+/// @group String
 @function media-operators() {
   @return "only" "not";
 }
@@ -411,6 +412,7 @@ $unique: unique-id();
   @return index(media-operators(), $operator) != null;
 }
 
+/// @group String
 @function media-types() {
   @return all aural braille handheld print projection screen tty tv embossed;
 }
@@ -424,6 +426,7 @@ $unique: unique-id();
   @return index(media-types(), $type) != null;
 }
 
+/// @group String
 @function directions() {
   @return left right up down;
 }

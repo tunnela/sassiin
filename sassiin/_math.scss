@@ -86,11 +86,11 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
   }
   @if $operator == "+" {
     @return $value + $other;
-  } @elseif $operator == "-" {
+  } @else if $operator == "-" {
     @return $value - $other;
-  } @elseif $operator == "*" {
+  } @else if $operator == "*" {
     @return $value * $other;
-  } @elseif $operator == "/" {
+  } @else if $operator == "/" {
     @return $value / $other;
   }
 }
@@ -311,7 +311,7 @@ $operators: "*" "/" "+" "-" "|" "^" "&" "<<" ">>>" ">>" "~";
       @if even($i) { $m: -1; }
       $r: $r + $m * (powi($x - 1, $i) / $i);
     }
-  } @elseif $x > 0.5 {
+  } @else if $x > 0.5 {
     @for $i from 1 through 100 {
       $r: $r + ((1 / $i) * powi(($x - 1) / $x, $i));
     }

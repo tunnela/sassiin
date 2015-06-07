@@ -90,10 +90,10 @@ $unique: unique-id();
       @if $priority-type != number {
         @error "handler() expects parameter 4 to be a priority number, #{$priority-type} given";
       }
-    } @elseif $property-list-type == number {
+    } @else if $property-list-type == number {
       $priority: $property-list;
       $property-list: "";
-    } @elseif $property-list-type != string and index-other(types($property-list), string) != null {
+    } @else if $property-list-type != string and index-other(types($property-list), string) != null {
       @error "handler() expects parameter 3 to be a property-list string or priority number, #{$property-list-type} given";
     }
   }
@@ -194,7 +194,7 @@ $unique: unique-id();
       value: nth($args, 2),
       property: $values
     );
-  } @elseif $isDeclaration && $argc == 1 and type-of($values) == list and length($values) > 0 {
+  } @else if $isDeclaration && $argc == 1 and type-of($values) == list and length($values) > 0 {
     @each $declaration in $values {
       $action: append($action, (
         type: $type,
@@ -202,7 +202,7 @@ $unique: unique-id();
         value: map-nth-value($declaration, 1)
       ), space);
     }
-  } @elseif $isDeclaration == false and $argc == 1 {
+  } @else if $isDeclaration == false and $argc == 1 {
     $action: (
       type: $type,
       value: $value
@@ -243,11 +243,11 @@ $unique: unique-id();
               @if $type == replace-declaration {
                 $this: ();
                 $this: append($this, $action);
-              } @elseif $type == prepend-declaration {
+              } @else if $type == prepend-declaration {
                 $prepend: prepend($prepend, $action);
-              } @elseif $type == append-declaration {
+              } @else if $type == append-declaration {
                 $append: append($append, $action);
-              } @elseif $type == remove-declaration {
+              } @else if $type == remove-declaration {
                 $this: ();
               }
             }
@@ -313,7 +313,7 @@ $unique: unique-id();
       @if length($value) > 0 {
         @if $mixin == null {
           #{$property}: #{$value};
-        } @elseif not current-breakpoint() {
+        } @else if not current-breakpoint() {
           @include mixin($mixin, $args...) {
             #{$property}: #{$value};
           }
@@ -495,13 +495,13 @@ $unique: unique-id();
           $expression: $expression / 16 * 1em;
         }
         $expressions: map-set($expressions, min-width, $expression);
-      } @elseif $expression-types == string and is-media-operator($feature-1) {
+      } @else if $expression-types == string and is-media-operator($feature-1) {
         $type-prefix: $expression;
-      } @elseif $expression-types == string and is-media-type($feature-1) {
+      } @else if $expression-types == string and is-media-type($feature-1) {
         $type: $expression;
-      } @elseif $expression-types == string {
+      } @else if $expression-types == string {
         $expressions: map-set($expressions, $feature-1, true);
-      } @elseif $expression-types == (string number number) or 
+      } @else if $expression-types == (string number number) or 
       $expression-types == (string color color) {
         $feature-2: nth($expression, 2);
         $feature-3: nth($expression, 3);
@@ -515,7 +515,7 @@ $unique: unique-id();
           }
         }
         $expressions: map-merge($expressions, (min-#{$feature-1}: $feature-2, max-#{$feature-1}: $feature-3));
-      } @elseif $expression-types == (number number)  {
+      } @else if $expression-types == (number number)  {
         $feature-2: nth($expression, 2);
 
         @if unit($feature-1) == "" {
@@ -525,7 +525,7 @@ $unique: unique-id();
           $feature-2: $feature-2 / 16 * 1em;
         }
         $expressions: map-merge($expressions, (min-width: $feature-1, max-width: $feature-2));
-      } @elseif $expression-types-1 == string and $expression-length == 2 and 
+      } @else if $expression-types-1 == string and $expression-length == 2 and 
       $expression-types != (string string) {
         $feature-2: nth($expression, 2);
 
@@ -586,7 +586,7 @@ $unique: unique-id();
       @if $value == true {
         @if is-media-type($key) {
           $type: $key;
-        } @elseif is-media-operator($key) {
+        } @else if is-media-operator($key) {
           $type-prefix: $key;
         } @else {
           $expression-list: append($expression-list, "(#{$key})");
@@ -1042,7 +1042,7 @@ $unique: unique-id();
 
     @if type-of($arg2) == number or $arg2 == auto {
       $width: $arg2;
-    } @elseif $argc == 2 {
+    } @else if $argc == 2 {
       $media-query: $arg2;
     }
   }
@@ -1060,7 +1060,7 @@ $unique: unique-id();
   @if $media-query != null {
     @include breakpoint-option($name, type, media-query);
     @include breakpoint-option($name, media-query, $media-query);
-  } @elseif $width != null or $height != null {
+  } @else if $width != null or $height != null {
     @include breakpoint-option($name, type, dimensions);
 
     @if $width != null {
@@ -1140,14 +1140,14 @@ $unique: unique-id();
 
     @if $type == null {
       $type: $new-type;
-    } @elseif $new-type != $type {
+    } @else if $new-type != $type {
       @error "breakpoint-group() expects all breakpoints to have dimensions";
     }
     $new-media-query: breakpoint-option($breakpoint-name, media-query, ());
 
     @if $breakpoint-media-query == null {
       $breakpoint-media-query: $new-media-query;
-    } @elseif $type == dimensions and $new-media-query != $breakpoint-media-query {
+    } @else if $type == dimensions and $new-media-query != $breakpoint-media-query {
       @error "breakpoint-group() expects breakpoints' media queries match";
     }
     @if not breakpoint-option($breakpoint-name, default-group) {
@@ -1667,7 +1667,7 @@ $unique: unique-id();
 
   @if $is-null == false and $current-breakpoint != null {
     @error "target() does not accept parameter 1 when called inside on()";
-  } @elseif $is-null and $current-breakpoint != null {
+  } @else if $is-null and $current-breakpoint != null {
     $postfix: breakpoint-postfix($current-breakpoint);
     $selector: postfix-selectors(&, "-#{$postfix}", $first-only);
     
@@ -1764,7 +1764,7 @@ $unique: unique-id();
                 @content;
               }
               @include current-breakpoint(null);
-            } @elseif $direction == right {
+            } @else if $direction == right {
               $max-width: breakpoint-option($name, width);
               $max-height: breakpoint-option($name, height);
               $media-query: $original-media-query;
@@ -1828,7 +1828,7 @@ $unique: unique-id();
             @include current-breakpoint(null);
           }
         }
-      } @elseif $direction == right {
+      } @else if $direction == right {
         @for $n from 1 through $width-count {
           $name: map-nth-key($widths, $n);
           
@@ -1850,7 +1850,7 @@ $unique: unique-id();
             @include current-breakpoint(null);
           }
         }
-      } @elseif $direction == up {
+      } @else if $direction == up {
         $heights: map-reverse($heights);
 
         @for $n from 1 through $height-count {
@@ -1874,7 +1874,7 @@ $unique: unique-id();
             @include current-breakpoint(null);
           }
         }
-      } @elseif $direction == down {
+      } @else if $direction == down {
         @for $n from 1 through $height-count {
           $name: map-nth-key($heights, $n);
           

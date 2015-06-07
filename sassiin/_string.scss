@@ -62,11 +62,11 @@ $unicode-chars:
       @return str-slice($string, 1, $index - 1) + $replace + str-replace(str-slice($string, $index + str-length($search)), $search, $replace);
     }
     @return $string;
-  } @elseif types($string $search $replace) == (string list string) {
+  } @else if types($string $search $replace) == (string list string) {
     @for $i from 1 through length($search) {
       $string: str-replace($string, nth($search, $i), $replace);
     }
-  } @elseif types($string $search $replace) == (string list list) && length($search) == length($replace) {
+  } @else if types($string $search $replace) == (string list list) && length($search) == length($replace) {
     @for $i from 1 through length($search) {
       $string: str-replace($string, nth($search, $i), nth($replace, $i));
     }
@@ -110,7 +110,7 @@ $unicode-chars:
   }
   @if $left-length < $right-length {
     @return -1;
-  } @elseif $left-length > $right-length {
+  } @else if $left-length > $right-length {
     @return 1;
   }
   @return 0;
@@ -300,7 +300,7 @@ $unicode-chars:
       $items: append($items, variable-to-string($item, true));
     }
     $str: $str + list-to-string($items, $separator) + if($sub-list, ")", ""); 
-  } @elseif $type == map {
+  } @else if $type == map {
     $items: ();
     $str: "("; 
 
@@ -308,9 +308,9 @@ $unicode-chars:
       $items: append($items, "" + variable-to-string($key) + ": " + variable-to-string($item));
     }
     $str: $str + list-to-string($items, $new-separator) + ")"; 
-  } @elseif $type == string {
+  } @else if $type == string {
     $str: "\"" + $variable + "\"";
-  } @elseif $type == "null" {
+  } @else if $type == "null" {
     $str: "null"; 
   } @else {
     $str: "" + $variable; 

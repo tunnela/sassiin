@@ -213,7 +213,7 @@
 
     @if type-of($item) == map {
       @error "list-to-string() does not expect parameter 1 to contain maps";
-    } @elseif type-of($item) == list {
+    } @else if type-of($item) == list {
       $sub-string: list-to-string($item, $glue);
     } @else {
       $sub-string: $item;

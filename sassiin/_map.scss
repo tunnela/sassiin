@@ -406,7 +406,7 @@
     @each $item in $items {
       $list: join($list, map-list-flatten($item));
     }
-  } @elseif type-of($items) == map {
+  } @else if type-of($items) == map {
     $list: append($list, $items);
   }
   @return $list;

@@ -900,11 +900,17 @@ $unique: unique-id();
 /// @group Core
 ///
 /// @parameter $name
-/// @parameter $default [null]
+/// @parameter $value [null]
 ///
 /// @requires {mixin} set
-@mixin _set($name, $default: null) {
-  @include set($name, $default, null);
+@mixin _set($name, $value: null) {  
+  @if type-of($name) == map {
+    @each $key, $value in $name {
+      @include _set($key, $value);
+    }
+  } @else {
+    $sassiin: map-set($sassiin, $name, $value) !global;
+  }
 }
 
 /// @group Core
@@ -914,7 +920,18 @@ $unique: unique-id();
 ///
 /// @requires {function} get
 @function _get($name, $default: null) {
-  @return get($name, $default, null, false);
+  $sassiin: () !global !default;
+
+  @if map-has-key($sassiin, $name) {
+    $value: map-get($sassiin, $name);
+
+    @if is-executable($value) {
+      @return exec($value);
+    }
+    @return $value;
+  } @else {
+    @return $default;
+  }
 }
 
 /// @group Core
@@ -923,7 +940,8 @@ $unique: unique-id();
 ///
 /// @requires {function} exists
 @function _exists($name) {
-  @return exists($name, null);
+  $sassiin: () !global !default;
+  @return map-has-key($sassiin, $name);
 }
 
 /// @group Core
@@ -932,7 +950,8 @@ $unique: unique-id();
 ///
 /// @requires {mixin} unset
 @mixin _unset($name) {
-  @include unset($name, null);
+  $sassiin: () !global !default;
+  $sassiin: map-remove($sassiin, $name) !global;
 }
 
 /// @group Core

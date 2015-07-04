@@ -550,6 +550,8 @@ $unique: unique-id();
 
 /// @group Core
 ///
+/// @alias parse-media-query
+///
 /// @parameter {arglist} $args...
 ///
 /// @requires {function} parse-media-query
@@ -690,6 +692,8 @@ $unique: unique-id();
 // }
 
 /// @group Core
+///
+/// @alias media-query
 ///
 /// @parameter {arglist} $args...
 ///
@@ -1728,17 +1732,15 @@ $unique: unique-id();
 /// @requires {function} map-reverse
 /// @requires {function} map-sort
 /// @requires {function} multi-map-column
-/// @requires {function} on
 /// @requires {function} parse-names
-/// @requires {mixin} current-breakpoint
-/// @requires {mixin} media-query
 ///
 /// @throws on() expects parameter 2 to be a direction, #{$direction} given.
-@mixin on($names: (), $direction: null, $media-query: (), $fallback: fallback-breakpoint()) {
+@function breakpoint-media-query($names: (), $direction: null, $media-query: (), $fallback: fallback-breakpoint()) {
+  $media-queries: ();
+  $has-media-query: length($media-query) != 0;
   $original-media-query: $media-query;
   $direction: if($direction == null, default-direction(), $direction);
   $names-count: length($names);
-  $has-media-query: length($media-query) != 0;
   $default-breakpoint: default-breakpoint();
 
   @if $names-count == 0 {
@@ -1757,15 +1759,11 @@ $unique: unique-id();
         $new-name-list: append($new-name-list, $names);
         $name-list: $new-name-list;
       }
-
       @each $name in $name-list {
         @if is-breakpoint($name) {
-          @include current-breakpoint($name);
           $breakpoint-type: breakpoint-option($name, type);
+          $current-fallback: if($has-media-query == false and $name == $fallback, $fallback, null);
 
-          @if $has-media-query == false and $name == $fallback {
-            @content;
-          } 
           @if $breakpoint-type == dimensions {
             @if $direction == left {
               $max-width: breakpoint-option($name, width);
@@ -1778,11 +1776,11 @@ $unique: unique-id();
               @if $max-height != null and $max-height != auto {
                 $media-query: append($media-query, (max-height $max-height));
               }
-              @include current-breakpoint($name);
-              @include media-query($media-query) {
-                @content;
-              }
-              @include current-breakpoint(null);
+              $media-queries: append($media-queries, (
+                name: $name, 
+                media-query: $media-query, 
+                fallback: $current-fallback
+              ));
             } @else if $direction == right {
               $max-width: breakpoint-option($name, width);
               $max-height: breakpoint-option($name, height);
@@ -1794,20 +1792,20 @@ $unique: unique-id();
               @if $max-height != null and $max-height != auto {
                 $media-query: append($media-query, (min-height $max-height));
               }
-              @include current-breakpoint($name);
-              @include media-query($media-query) {
-                @content;
-              }
-              @include current-breakpoint(null);
+              $media-queries: append($media-queries, (
+                name: $name, 
+                media-query: $media-query, 
+                fallback: $current-fallback
+              ));
             }
           } @else {
             $media-query: join($original-media-query, breakpoint-option($name, media-query));
-
-            @include media-query($media-query) {
-              @content;
-            }
+            $media-queries: append($media-queries, (
+              name: $name, 
+              media-query: $media-query, 
+              fallback: $current-fallback
+            ));
           }
-          @include current-breakpoint(null);
         }
       }
     } @else {
@@ -1817,12 +1815,8 @@ $unique: unique-id();
       $width-count: length($widths);
       $heights: map-sort(multi-map-column($breakpoints-values, height, name));
       $height-count: length($heights);
+      $current-fallback: if($has-media-query == false and list-contains($name-list, $fallback), $fallback, null);
 
-      @if $has-media-query == false and list-contains($name-list, $fallback) {
-        @include current-breakpoint($fallback);
-        @content;
-        @include current-breakpoint(null);
-      }
       @if $direction == left {
         $widths: map-reverse($widths);
 
@@ -1840,11 +1834,11 @@ $unique: unique-id();
             @if $max-height != null and $max-height != auto {
               $media-query: append($media-query, (max-height $max-height));
             }
-            @include current-breakpoint($name);
-            @include media-query($media-query) {
-              @content;
-            }
-            @include current-breakpoint(null);
+            $media-queries: append($media-queries, (
+              name: $name, 
+              media-query: $media-query, 
+              fallback: $current-fallback
+            ));
           }
         }
       } @else if $direction == right {
@@ -1862,11 +1856,11 @@ $unique: unique-id();
             @if $max-height != null and $max-height != auto {
               $media-query: append($media-query, (max-height $max-height));
             }
-            @include current-breakpoint($name);
-            @include media-query($media-query) {
-              @content;
-            }
-            @include current-breakpoint(null);
+            $media-queries: append($media-queries, (
+              name: $name, 
+              media-query: $media-query, 
+              fallback: $current-fallback
+            ));
           }
         }
       } @else if $direction == up {
@@ -1886,11 +1880,11 @@ $unique: unique-id();
             @if $max-height != null and $max-height != auto {
               $media-query: append($media-query, (max-height $max-height));
             }
-            @include current-breakpoint($name);
-            @include media-query($media-query) {
-              @content;
-            }
-            @include current-breakpoint(null);
+            $media-queries: append($media-queries, (
+              name: $name, 
+              media-query: $media-query, 
+              fallback: $current-fallback
+            ));
           }
         }
       } @else if $direction == down {
@@ -1908,17 +1902,52 @@ $unique: unique-id();
             @if $min-height != null and $min-height != auto {
               $media-query: append($media-query, (min-height $min-height));
             }
-            @include current-breakpoint($name);
-            @include media-query($media-query) {
-              @content;
-            }
-            @include current-breakpoint(null);
+            $media-queries: append($media-queries, (
+              name: $name, 
+              media-query: $media-query, 
+              fallback: $current-fallback
+            ));
           }
         }
       } @else {
         @error "on() expects parameter 2 to be a direction, #{$direction} given.";
       }
     }
+  }
+  @return $media-queries;
+}
+
+/// @group Core
+///
+/// @parameter $names [()]
+/// @parameter $direction [null]
+/// @parameter $media-query [()]
+/// @parameter {string} $fallback [fallback-breakpoint()]
+///
+/// @requires {function} fallback-breakpoint
+/// @requires {function} breakpoint-media-query
+/// @requires {mixin} current-breakpoint
+/// @requires {mixin} media-query
+///
+/// @throws on() expects parameter 2 to be a direction, #{$direction} given.
+@mixin on($names: (), $direction: null, $media-query: (), $fallback: fallback-breakpoint()) {
+  $parsed: breakpoint-media-query($names, $direction, $media-query, $fallback);
+
+  @each $options in $parsed {
+    $name: map-get($options, name);
+    $media: map-get($options, media-query);
+    $fallback: map-get($options, fallback);
+
+    @if $fallback != null {
+      @include current-breakpoint($fallback);
+      @content;
+      @include current-breakpoint(null);
+    }
+    @include current-breakpoint($name);
+    @include media-query($media) {
+      @content;
+    }
+    @include current-breakpoint(null);
   }
 }
 

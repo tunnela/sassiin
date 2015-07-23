@@ -419,6 +419,20 @@ $unique: unique-id();
 
 /// @group Core
 ///
+/// @parameter $value
+///
+/// @requires {function} media-values
+@function is-media-value($value) {
+  @return index(media-values(), $value) != null;
+}
+
+/// @group Core
+@function media-values() {
+  @return portrait landscape;
+}
+
+/// @group Core
+///
 /// @parameter $type
 ///
 /// @requires {function} media-types
@@ -533,6 +547,8 @@ $unique: unique-id();
           $feature-2: $feature-2 / 16 * 1em;
         }
         $expressions: map-set($expressions, $feature-1, $feature-2);
+      } @else if $expression-types == (string string) and is-media-value(nth($expression, 2)) {
+        $expressions: map-set($expressions, $feature-1, nth($expression, 2));
       } @else {
         @error "Invalid expression `#{$expression}`";
       }

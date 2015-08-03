@@ -1573,13 +1573,29 @@ $unique: unique-id();
 /// @group Core
 ///
 /// @requires {function} str-replace
-@mixin like {
+@mixin like($type: left) {
   $selector: str-replace("" + &, ".", "");
+  $allowed: left left-dashed right right-dashed;
 
+  @if index($allowed, $type) == null {
+    @error "like() expects parameter 1 to be `left`, `left-dashed`, `right` or `right-dashed`.";
+  }
+  @if $type == left-dashed {
+    $selector: $selector + "-";
+  } @else if $type == right-dashed {
+    $selector: "-" + $selector;
+  }
   @include media-root-block {
-    [class^="#{$selector}"],
-    [class*=" #{$selector}"] {
-      @content;
+    @if index(left left-dashed, $type) {
+      [class^="#{$selector}"],
+      [class*=" #{$selector}"] {
+        @content;
+      }
+    } @else if index(right right-dashed, $type) {
+      [class$="#{$selector}"],
+      [class*="#{$selector} "] {
+        @content;
+      }
     }
   }
 }

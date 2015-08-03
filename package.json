@@ -1,0 +1,7 @@
+{
+  "name": "tunnela/sassiin",
+  "description": "Sassiin, the CSS authoring framework for rapid web development.",
+  "keywords": ["sass", "css", "authoring", "framework"],
+  "license": "MIT",
+  "author": "Lauri Tunnela <lauri@tunne.la> (http://tunne.la)"
+}

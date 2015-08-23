@@ -701,18 +701,28 @@ $unique: unique-id();
   @return map-get(media-query-ids(), $media-query);
 }
 
-// @function scope($args...) {
-//  @debug $args..
-//  $ids: media-query-ids();
-//  $media-query: media-query-string($args...);
-//  @debug $ids;
-//  @debug media-query-string($args...);
+@function scope($names: (), $direction: null, $media-query: ()) {
+  $parsed: breakpoint-media-query($names, $direction, $media-query);
+  $return: ();
 
-//  @if map-has-key($ids, $media-query) {
-//    @return map-get($ids, $media-query);
-//  }
-//  @return true;
-// }
+  @each $options in $parsed {
+    $media: map-get($options, media-query);
+    $query-string: media-query-string($media);
+    $ids: media-query-ids();
+
+    @if map-has-key($ids, $query-string) {
+      $return: append($return, map-get($ids, $query-string));
+    } @else {
+      $id: unique-id();
+      $sassiin: map-set($sassiin, media-query-ids, map-set($ids, $query-string, $id)) !global;
+      $return: append($return, $id);
+    }
+  }
+  @if length($return) == 1 {
+    @return nth($return, 1);
+  }
+  @return $return;
+}
 
 /// @group Core
 ///
@@ -863,15 +873,19 @@ $unique: unique-id();
 /// @requires {function} _get
 /// @requires {function} map-set
 /// @requires {mixin} set
-@mixin set($name, $value: null, $scope: true) {
+@mixin set($name, $value: null, $scopes: true) {
   $sassiin: () !global !default;
 
   @if type-of($name) == map {
     @each $key, $value in $name {
-      @include set($key, $value, $scope);
+      @include set($key, $value, $scopes);
+    }
+  } @else if (type-of($scopes) == list) {
+    @each $scope in $scopes {
+      @include set($name, $value, $scope);
     }
   } @else {
-    $id: if($scope == true, _get(media-query-id, null), $scope);
+    $id: if($scopes == true, _get(media-query-id, null), $scopes);
 
     @if $id == null {
       $sassiin: map-set($sassiin, $name, $value) !global;

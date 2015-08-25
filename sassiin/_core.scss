@@ -465,13 +465,14 @@ $unique: unique-id();
 /// @requires {function} types
 ///
 /// @throws Invalid expression `#{$expression}`
-@function parse-media-query($args...) {
+@function parse-media-query($media-query) {
+  @if length($media-query) == 0 {
+    $media-query: all;
+  }
+  $media-queries: list-split-value($media-query, _);
   $queries: ();
 
-  @if length($args) == 0 {
-    $args: all;
-  }
-  @each $query in $args {
+  @each $query in $media-queries {
     $type: null;
     $type-prefix: null;
     $expressions: ();
@@ -568,11 +569,11 @@ $unique: unique-id();
 ///
 /// @alias parse-media-query
 ///
-/// @parameter {arglist} $args...
+/// @parameter {list} $media-query
 ///
 /// @requires {function} parse-media-query
-@function pmq($args...) {
-  @return parse-media-query($args...);
+@function pmq($media-query) {
+  @return parse-media-query($media-query);
 }
 
 /// @group Core
@@ -584,19 +585,20 @@ $unique: unique-id();
 
 /// @group Core
 ///
-/// @parameter {arglist} $args...
+/// @parameter {list} $media-query
 ///
 /// @requires {function} is-media-operator
 /// @requires {function} is-media-type
 /// @requires {function} list-to-string
 /// @requires {function} parse-media-query
-@function media-query-string($args...){
+@function media-query-string($media-query: null){
   $query-list: ();
+  $media-query: list($media-query);
 
-  @if nth($args, 1) == null {
+  @if $media-query == null {
     @return null;
   }
-  @each $query in parse-media-query($args...) {
+  @each $query in parse-media-query($media-query) {
     $type: null;
     $type-prefix: null;
     $expression-list: ();
@@ -640,14 +642,14 @@ $unique: unique-id();
 
 /// @group Core
 ///
-/// @parameter {arglist} $args...
+/// @parameter {list} $media-query
 ///
 /// @requires {function} media-query-id
 /// @requires {function} media-query-string
 /// @requires {mixin} _set
 /// @requires {mixin} media-query-id
-@mixin media-query($args...) {
-  $query-string: media-query-string($args...);
+@mixin media-query($media-query) {
+  $query-string: media-query-string($media-query);
 
   @if $query-string == null {
     @content;
@@ -728,11 +730,11 @@ $unique: unique-id();
 ///
 /// @alias media-query
 ///
-/// @parameter {arglist} $args...
+/// @parameter {list} $media-query
 ///
 /// @requires {mixin} media-query
-@mixin mq($args...) {
-  @include media-query($args...) {
+@mixin mq($media-query) {
+  @include media-query($media-query) {
     @content;
   }
 }

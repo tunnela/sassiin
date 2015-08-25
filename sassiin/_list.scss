@@ -112,7 +112,7 @@
   $new-pivot: ();
   $new-pivot: append($new-pivot, $pivot);
 
-    @return list-merge(quick-list-sort($left), $new-pivot, quick-list-sort($right));
+  @return list-merge(quick-list-sort($left), $new-pivot, quick-list-sort($right));
 }
 
 /// @group List
@@ -186,6 +186,8 @@
     } @else {
       $end: $offset + $end;
     }
+  } @else {
+    $end: $list-length + 1;
   }
   $slice: ();
 

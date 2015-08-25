@@ -117,6 +117,33 @@
 
 /// @group List
 ///
+/// @parameter {list} $list
+/// @parameter {string} $value
+///
+@function list-split-value($list, $value) {
+  $list: list($list);
+  $return: ();
+  $index: 1;
+  $prevIndex: 0;
+
+  @each $item in $list {
+    @if $item == $value {
+      $index: $index + 1;
+    } @else {
+      @if $prevIndex < $index {
+        $prevIndex: $prevIndex + 1;
+        $return: append($return, ());
+      }
+      $nth-list: nth($return, $index);
+      $nth-list: append($nth-list, $item);
+      $return: set-nth($return, $index, $nth-list);
+    }
+  }
+  @return $return;
+}
+
+/// @group List
+///
 /// @parameter {arglist} $args...
 ///
 /// @requires {function} list-slice

@@ -3,12 +3,22 @@
   "version": "1.0.0",
   "description": "Sassiin, the CSS authoring framework for rapid web development.",
   "homepage": "https://github.com/tunnela/sassiin",
-  "author": "Lauri Tunnela <lauri@tunne.la> (http://tunne.la)",
+  "authors": [
+    "Lauri Tunnela <lauri@tunne.la> (http://tunne.la)"
+  ],
+  "main": "_sassiin.scss",
   "keywords": [
     "sass",
     "css",
     "authoring",
     "framework"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
 }

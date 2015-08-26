@@ -873,19 +873,19 @@ $unique: unique-id();
 /// @requires {function} _get
 /// @requires {function} map-set
 /// @requires {mixin} set
-@mixin set($name, $value: null, $scopes: true) {
+@mixin set($name, $value: null, $scope: true) {
   $sassiin: () !global !default;
 
   @if type-of($name) == map {
-    @each $key, $value in $name {
-      @include set($key, $value, $scopes);
+    @each $key, $val in $name {
+      @include set($key, $val, $scope);
     }
-  } @else if (type-of($scopes) == list) {
-    @each $scope in $scopes {
-      @include set($name, $value, $scope);
+  } @else if (type-of($scope) == list) {
+    @each $s in $scope {
+      @include set($name, $value, $s);
     }
   } @else {
-    $id: if($scopes == true, _get(media-query-id, null), $scopes);
+    $id: if($scope == true, _get(media-query-id, null), $scope);
 
     @if $id == null {
       $sassiin: map-set($sassiin, $name, $value) !global;

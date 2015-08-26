@@ -1524,7 +1524,7 @@ $unique: unique-id();
 ///
 /// @requires {function} _get
 @function default-direction() {
-  @return _get(default-direction);
+  @return _get(default-direction, right);
 }
 
 /// @group Core

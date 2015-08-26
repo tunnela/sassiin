@@ -1,9 +1,7 @@
-/**
- * Sassiin
- *
- * @copyright   Copyright 2015, Lauri Tunnela
- * @license     http://tunne.la/MIT.txt The MIT License
- */
+/// Sassiin
+///
+/// @copyright   Copyright 2015, Lauri Tunnela
+/// @license     http://tunne.la/MIT.txt The MIT License
 
 @charset "UTF-8";
 
@@ -2095,3 +2093,15 @@ $unique: unique-id();
     }
   }
 }
+
+@mixin sassiin() {
+  /**
+   * This stylesheet was generated with Sassiin.
+   *
+   * @copyright   Copyright 2015, Lauri Tunnela
+   * @license     http://tunne.la/MIT.txt The MIT License
+   * @see         https://github.com/tunnela/sassiin
+   */
+}
+
+@include sassiin;

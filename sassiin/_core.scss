@@ -499,6 +499,10 @@ $unique: unique-id();
     }
     @each $expression in $query {
       $expression-length: length($expression);
+
+      @if $expression-length == 1 {
+        $expression: nth($expression, 1);
+      }
       $expression-types: types($expression);
       $expression-types-1: nth($expression-types, 1);
       $feature-1: nth($expression, 1);

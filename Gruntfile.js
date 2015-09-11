@@ -5,5 +5,5 @@ module.exports = function(grunt) {
 	});
 
 	grunt.loadNpmTasks('grunt-release');
-	grunt.registerTask('release', ['release']);
+	grunt.registerTask('publish', ['release']);
 };

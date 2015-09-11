@@ -11,5 +11,9 @@
     "framework"
   ],
   "license": "MIT",
-  "repository": "tunnela/sassiin"
+  "repository": "tunnela/sassiin",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-release": "^0.13.0"
+  }
 }

@@ -1,8 +1,6 @@
 # Sassiin
 The CSS authoring framework for rapid web development. Sassiin takes advantage of the latest features of Sass and therefore only supports Sass 3.4 and up.
 
-## Usage instructions
-
 ## Easy Installation
 
 ### Install with [Bower](http://bower.io/)
@@ -19,6 +17,14 @@ You can install Sassiin by running the following command:
 
 ```shell
 bower install sassiin --save
+```
+
+### Import Sassiin
+
+Last step is to import _sassiin.scss in every file that requires Sassiin, usually in your project's main Sass file:
+
+```scss
+@import "path-to-sassiin/sassiin"
 ```
 
 ## TODO

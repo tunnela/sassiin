@@ -705,27 +705,57 @@ $unique: unique-id();
   @return map-get(media-query-ids(), $media-query);
 }
 
+/// @group Core
+///
+/// @parameter $media-query
+///
+/// @requires {function} media-query-string
+/// @requires {function} media-query-ids
+/// @requires {function} map-get
+/// @requires {function} map-set
+/// @requires {function} breakpoint-media-query
 @function scope($names: (), $direction: null, $media-query: ()) {
+  @if $direction == null and length($names) == 0 and length($media-query) > 0 {
+    $query-string: media-query-string($media-query);
+    $ids: media-query-ids();
+
+    @if map-has-key($ids, $query-string) {
+      @return map-get($ids, $query-string);
+    } @else {
+      $id: unique-id();
+      $sassiin: map-set($sassiin, media-query-ids, map-set($ids, $query-string, $id)) !global;
+      @return $id;
+    }
+  }
   $parsed: breakpoint-media-query($names, $direction, $media-query);
   $return: ();
 
   @each $options in $parsed {
     $media: map-get($options, media-query);
-    $query-string: media-query-string($media);
-    $ids: media-query-ids();
-
-    @if map-has-key($ids, $query-string) {
-      $return: append($return, map-get($ids, $query-string));
-    } @else {
-      $id: unique-id();
-      $sassiin: map-set($sassiin, media-query-ids, map-set($ids, $query-string, $id)) !global;
-      $return: append($return, $id);
-    }
+    $return: append($return, scope((), null, $media));
   }
   @if length($return) == 1 {
     @return nth($return, 1);
   }
   @return $return;
+}
+
+/// @group Core
+///
+/// @parameter $media-query
+///
+/// @requires {function} scope
+@function media-query-scope($media-query) {
+  @return scope((), null, $media-query);
+}
+
+/// @group Core
+///
+/// @parameter $media-query
+///
+/// @requires {function} media-query-scope
+@function mq-scope($media-query) {
+  @return media-query-scope($media-query);
 }
 
 /// @group Core

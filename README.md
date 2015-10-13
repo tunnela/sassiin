@@ -31,7 +31,63 @@ Last step is to import _sassiin.scss in every file that requires Sassiin, usuall
 
 ### Media Queries
 
-Todo
+Media query generation is made easy in Sassiin. Let's say that we wanted to create a horizontal navigation menu which is hidden in small resolution devices and in print. The navigation menu also becomes vertical in medium resolution devices. This is how we would do it in Sassiin:
+
+```scss
+.navigation {
+  @include mq(print _ (max-width 480)) {
+    display: none;
+  }
+
+  &-item {
+    display: inline-block;
+    
+    @include mq(width 480 640) {
+      display: block;
+    }
+  }
+}
+```
+
+Generated CSS will look as follows:
+
+```css
+@media print, (max-width: 30em) {
+  .navigation {
+    display: none; 
+  } 
+}
+
+.navigation-item {
+  display: inline-block; 
+} 
+
+@media (min-width: 30em) and (max-width: 40em) {
+  .navigation-item {
+    display: block; 
+  } 
+}
+```
+
+In Sassiin underscore character means "or". A string followed by two numbers is converted to min-max-range. Single Number is converted to min-width and single string generated as is. As an example:
+
+```scss
+.navigation {
+  @include mq(print 100 _ (max-width 480) (height 200 500)) {
+    display: none;
+  }
+}
+```
+
+Results in:
+
+```css
+@media print and (min-width: 6.25em), (max-width: 30em) and (min-height: 12.5em) and (max-height: 31.25em) {
+  .navigation {
+    display: none; 
+  } 
+}
+```
 
 ### Breakpoints
 

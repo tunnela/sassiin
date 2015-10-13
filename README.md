@@ -99,12 +99,9 @@ The reason why people use Sass is that it allows you to create reusable styleshe
 
 ```scss
 $vars: (
-  primary-color: red
-);
-
-$vars: map-merge($vars, (
+  primary-color: red,
   primary-color-darken-amount: 5%
-));
+);
 
 $vars: map-merge($vars, (
   primary-color-darker: darken(

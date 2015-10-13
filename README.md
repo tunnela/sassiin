@@ -1,9 +1,26 @@
 # Sassiin
 The CSS authoring framework for rapid web development. Sassiin takes advantage of the latest features of Sass and therefore only supports Sass 3.4 and up.
 
-## Easy Installation
+## Contents
 
-### Install with [Bower](http://bower.io/)
+1. [Easy Installation](#1-easy-installation)
+    1. [Install with Bower](#i-install-with-bower)
+    2. [Import Sassiin](#ii-import-sassiin)
+2. [Usage Instructions](#2-usage-instructions)
+    1. [Media Queries](#i-media-queries)
+    2. [Breakpoints](#ii-breakpoints)
+    3. [Variables](#iii-variables)
+        1. [No To Global Scope](#a-no-to-global-scope)
+        2. [Custom Scope](#b-custom-scope)
+        3. [Media Query Awareness](#c-media-query-awareness)
+        4. [Mutator Function](#d-mutator-function)
+    4. [Handlers](#iv-handlers)
+    5. [Placeholders](#v-placeholders)
+3. [TODO](#3-todo)
+
+## 1. Easy Installation
+
+### i. Install with [Bower](http://bower.io/)
 
 I you have not installed Bower yet, follow the [instructions](http://bower.io/#install-bower) on Bower website.
 
@@ -19,7 +36,7 @@ You can install Sassiin by running the following command:
 bower install sassiin --save
 ```
 
-### Import Sassiin
+### ii. Import Sassiin
 
 Last step is to import _sassiin.scss in every file that requires Sassiin, usually in your project's main Sass file:
 
@@ -27,9 +44,9 @@ Last step is to import _sassiin.scss in every file that requires Sassiin, usuall
 @import "path-to-sassiin/sassiin"
 ```
 
-## Usage Instructions
+## 2 Usage Instructions
 
-### Media Queries
+### i. Media Queries
 
 Media query generation is made easy in Sassiin. Let's say that we wanted to create a horizontal navigation menu which is hidden in small resolution devices and in print. The navigation menu also becomes vertical in medium resolution devices. This is how we would do it in Sassiin:
 
@@ -89,15 +106,54 @@ Results in:
 }
 ```
 
-### Breakpoints
+### ii. Breakpoints
 
 Todo
 
-### Variables
+### iii. Variables
 
 There are few reasons why I decided to add a variable system to Sassiin. Firstly, I wanted to circumvent problems caused by global variables. Secondly, I wanted to have an option to define variables generated on call-time by one or more mutator functions. Thirdly, I wanted to make the use of a variable, media query aware.
 
-#### Media Query Awareness
+#### a. No To Global Scope
+
+In Sassiin *get*-function is used to retrieve and *set*-mixin to store key-value-pairs. This is how we use them:
+
+```scss
+@include set(primary-color, red);
+@debug get(primary-color); // @return red
+```
+
+You can also store multiple key-value-pairs at once:
+
+```scss
+@include set((
+  primary-color: red, 
+  secondary-color: green
+));
+
+@debug get(primary-color); // @return red
+@debug get(secondary-color); // @return green
+```
+
+Also when you are retrieving a value with *get*-function and the value for given key is not found, you can define the returned default value. This is how you do it:
+
+```scss
+@debug get(random-key, "this is default value"); // @return this is default value
+```
+
+#### b. Custom Scope
+
+Sassiin let's you define scope for key-value-pairs.
+
+```scss
+@include set(primary-color, red, theme2);
+@include set(primary-color, blue, theme2);
+
+@debug get(primary-color, $scope: theme1); // @return red
+@debug get(primary-color, $scope: theme2); // @return blue
+```
+
+#### c. Media Query Awareness
 
 Let's see an example of how variables are media query aware in Sassiin.
 
@@ -108,8 +164,8 @@ Let's see an example of how variables are media query aware in Sassiin.
 @include breakpoint-group(devices, small medium large);
 
 @include set((
-	default-font-size: 16px,
-	default-line-height: 28px
+  default-font-size: 16px,
+  default-line-height: 28px
 ));
 
 @include set(default-line-height, 24px, scope(small));
@@ -149,7 +205,7 @@ The result is as follows:
 
 As you can see, the line height is different for small devices just like we wanted.
 
-#### Mutator Function
+#### d. Mutator Function
 
 The reason why people use Sass is that it allows you to create reusable stylesheets that are customizable with variables. Sass is pretty flexible but there is a one little problem. I'm quite sure that I'm not the only one adding my variables inside a map. The reason why I'm doing this is to keep the global scope clean. Let's say that I wanted to create three variables, one for primary color, one for darker version of it and one more to control the amount of the brightness reduction. Now how do we do this with Sass maps?
 
@@ -183,7 +239,7 @@ There goes the readability... Now let's see how this is done with Sassiin using 
 
 Pretty neat huh?
 
-### Handlers
+### iv. Handlers
 
 Sassiin's handler system allows you to attach handler functions on CSS declarations. Let's have an example. First, let's make a handler function which adds common browser prefixes to each processed property:
 
@@ -223,7 +279,7 @@ The generated CSS will look as follows:
 box-shadow: 7px 7px 5px 0px rgba(50, 50, 50, 0.75);
 ```
 
-### Placeholders
+### v. Placeholders
 
 Sassiin's placeholder system is quite awesome. That's because Sassiin let's you create media query aware placeholders. As an example, let's first create a placeholder which hides element visually:
 
@@ -295,7 +351,7 @@ What Sassiin does is that it automagically extends the correct placeholder based
 }
 ```
 
-## TODO
+## 3 TODO
 
 - Describe functions and mixins by adding @description annotation to them
 - Documentation

@@ -1,5 +1,5 @@
 # Sassiin
-The CSS authoring framework for rapid web development. Sassiin takes advantage of the latest features of Sass and therefore only supports Sass 3.4 and up.
+Sassiin is the CSS authoring framework for rapid web development. It is the only Sass framework that really takes advantage of all the latest features of Sass (3.4 and up). Sassiin's amazing breakpoint system combined with declaration handlers, call-time generated variables and media query aware placeholders takes the CSS development to the next level. Please give it a go and [let me know](#4-author) your thoughts!
 
 ## Contents
 
@@ -17,6 +17,8 @@ The CSS authoring framework for rapid web development. Sassiin takes advantage o
     4. [Handlers](#iv-handlers)
     5. [Placeholders](#v-placeholders)
 3. [TODO](#3-todo)
+4. [Author](#4-author)
+5. [License](#5-license)
 
 ## 1. Easy Installation
 
@@ -86,7 +88,7 @@ Generated CSS will look as follows:
 }
 ```
 
-In Sassiin underscore character means "or". A string followed by two numbers is converted to min-max-range. Single Number is converted to min-width and single string generated as is. As an example:
+In Sassiin underscore character means "or". A string followed by two numbers is converted to min-max-range. Single number is converted to min-width and single string generated as is. As an example:
 
 ```scss
 .navigation {
@@ -108,7 +110,9 @@ Results in:
 
 ### ii. Breakpoints
 
-Todo
+Breakpoint system is one of the most important features of Sassiin. With it stylesheet development could not be any easier. There are two types of breakpoints; breakpoints with at least one dimension and breakpoints without any dimensions.
+
+To be continued...
 
 ### iii. Variables
 
@@ -207,7 +211,7 @@ As you can see, the line height is different for small devices just like we want
 
 #### d. Mutator Function
 
-The reason why people use Sass is that it allows you to create reusable stylesheets that are customizable with variables. Sass is pretty flexible but there is a one little problem. I'm quite sure that I'm not the only one adding my variables inside a map. The reason why I'm doing this is to keep the global scope clean. Let's say that I wanted to create three variables, one for primary color, one for darker version of it and one more to control the amount of the brightness reduction. Now how do we do this with Sass maps?
+The reason why people use Sass is that it allows you to create reusable stylesheets that are customizable with variables. Sass is pretty flexible but there is a one little problem. I'm quite sure that I'm not the only one adding my variables inside a map. The reason why I'm doing this is to keep the global scope clean. Let's say that I wanted to create three variables, one for primary color, one for darker version of it and one more to control the amount of primary color's brightness reduction. Now how do we do this with Sass maps?
 
 ```scss
 $vars: (
@@ -356,3 +360,13 @@ What Sassiin does is that it automagically extends the correct placeholder based
 - Describe functions and mixins by adding @description annotation to them
 - Documentation
 - Tests
+
+## 4 Author
+
+Lauri Tunnela is a young and passionate B.Eng from Finland. He does everything from embedded C development to front-end web development. Lauri loves coding tools that make software development fast and easy for everyone. He hopes you to use Sassiin as you see fit. Although, as its developer he would be more than happy to know your thoughts about it!
+
+## 5 License
+
+Sassiin is licensed under The MIT License (MIT). 
+
+Copyright (c) 2015 Lauri Tunnela

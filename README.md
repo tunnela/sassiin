@@ -363,7 +363,7 @@ What Sassiin does is that it automagically extends the correct placeholder based
 
 ## 4 Author
 
-Lauri Tunnela is a young and passionate B.Eng from Finland. He does everything from embedded C development to front-end web development. Lauri loves to build tools that make software development fast and easy for everyone. He hopes you to use Sassiin as you see fit. Although, as its developer he would be more than happy to know where you've used it and what are your thoughts about it! For contact details see [Lauri's profile](/tunnela/).
+Lauri Tunnela is a young and passionate B.Eng. from Finland. He does everything from embedded C development to front-end web development. Lauri loves to build tools that make software development fast and easy for everyone. He hopes you to use Sassiin as you see fit. Although, as its developer he would be more than happy to know where you've used it and what are your thoughts about it! For contact details see [Lauri's profile](/tunnela/).
 
 ## 5 License
 

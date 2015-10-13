@@ -41,7 +41,7 @@ Todo
 
 There are few reasons why I decided to add a variable system to Sassiin. Firstly, I wanted to circumvent problems caused by global variables. Secondly, I wanted to have an option to define variables generated on call-time by one or more mutator functions. Thirdly, I wanted to make the use of a variable, media query aware.
 
-#### Media Query Awereness
+#### Media Query Awareness
 
 Let's see an example of how variables are media query aware in Sassiin.
 

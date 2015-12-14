@@ -1679,7 +1679,7 @@ $unique: unique-id();
   $postfix-length: length($postfix);
 
   @each $selector in $selectors {
-    $selector: list-reverse($selector);
+    $selector: list-reverse(list($selector));
     $new-selector: ();
     $loop: true;
 
@@ -1737,9 +1737,11 @@ $unique: unique-id();
   $breakpoint: current-breakpoint();
 
   @if $breakpoint {
+    $selector: "#{&}";
+
     @include media-root-block {
       $postfix: breakpoint-postfix($breakpoint);
-      $selector: str-replace("#{&}", "-" + $postfix + "-", "-") + "-" + $postfix;
+      $selector: str-replace($selector, "-" + $postfix + "-", "-") + "-" + $postfix;
 
       #{$selector} {
         @content;
@@ -1779,7 +1781,7 @@ $unique: unique-id();
     @error "target() does not accept parameter 1 when called inside on()";
   } @else if $is-null and $current-breakpoint != null {
     $postfix: breakpoint-postfix($current-breakpoint);
-    $selector: postfix-selectors(&, "-#{$postfix}", $first-only);
+    $selector: postfix-selectors("#{&}", "-#{$postfix}", $first-only);
     
     #{$selector} {
       @content;
@@ -1788,7 +1790,7 @@ $unique: unique-id();
     @include on($names, $direction, $fallback: $fallback) {
       $breakpoint: current-breakpoint();
       $postfix: breakpoint-postfix($breakpoint);
-      $selector: postfix-selectors(&, "-#{$postfix}", $first-only);
+      $selector: postfix-selectors("#{&}", "-#{$postfix}", $first-only);
 
       @include media-root-block {
         #{$selector} {

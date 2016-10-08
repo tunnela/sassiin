@@ -22,9 +22,13 @@ Sassiin is the CSS authoring framework for rapid web development. It is the only
 
 ## 1. Easy Installation
 
-### i. Install with [Bower](http://bower.io/)
+### i. Install with [NPM](https://www.npmjs.com) or [Bower](https://bower.io)
 
-I you have not installed Bower yet, follow the [instructions](http://bower.io/#install-bower) on Bower website.
+```shell
+npm i --save-dev sassiin
+```
+
+I you have not installed Bower yet, follow the [instructions](https://bower.io/#install-bower) on Bower website.
 
 If this is the first time you use Bower, you might want to create project specific manifest file bower.json. Change to your project directory and run the following command:
 
@@ -35,7 +39,7 @@ bower init
 You can install Sassiin by running the following command:
 
 ```shell
-bower install sassiin --save
+bower install sassiin --save-dev 
 ```
 
 ### ii. Import Sassiin
@@ -43,7 +47,7 @@ bower install sassiin --save
 Last step is to import _sassiin.scss in every file that requires Sassiin, usually in your project's main Sass file:
 
 ```scss
-@import "path-to-sassiin/sassiin"
+@import "node_modules/sassiin/sassiin"
 ```
 
 ## 2 Usage Instructions

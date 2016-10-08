@@ -4,7 +4,7 @@ Sassiin is the CSS authoring framework for rapid web development. It is the only
 ## Contents
 
 1. [Easy Installation](#1-easy-installation)
-    1. [Install with Bower](#i-install-with-bower)
+    1. [Install with Bower](#i-install-with-npm-or-bower)
     2. [Import Sassiin](#ii-import-sassiin)
 2. [Usage Instructions](#2-usage-instructions)
     1. [Media Queries](#i-media-queries)

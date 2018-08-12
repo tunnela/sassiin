@@ -249,7 +249,7 @@
       @error "map-key-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not";
     }
   }
-  @return call("#{$algorithm}-map-sort", $map, true);
+  @return call(safe-get-function("#{$algorithm}-map-sort"), $map, true);
 }
 
 /// @group Map
@@ -285,7 +285,7 @@
       @error "map-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not";
     }
   }
-  @return call("#{$algorithm}-map-sort", $map, false);
+  @return call(safe-get-function("#{$algorithm}-map-sort"), $map, false);
 }
 
 /// @group Map
@@ -318,7 +318,7 @@
       @error "map-key-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not";
     }
   }
-  @return call("#{$algorithm}-map-sort", $map, true);
+  @return call(safe-get-function("#{$algorithm}-map-sort"), $map, true);
 }
 
 /// @group Map

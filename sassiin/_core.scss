@@ -230,7 +230,7 @@ $unique: unique-id();
       $handler: map-get($options, handler);
 
       @if $property-list == "" or index($property-list, $property) != null {
-        $actions: map-to-list(call($handler, $property, $values));
+        $actions: map-to-list(call(safe-get-function($handler), $property, $values));
 
         @if length($actions) > 0 {
           @each $action in $actions {
@@ -1074,7 +1074,7 @@ $unique: unique-id();
       $action-count: $action-count + 1;
 
       @if $current-action != false {
-        $return: append($return, call($current-action, $values...));
+        $return: append($return, call(safe-get-function($current-action), $values...));
       }
       $values: ();
       $current-action: str-slice($action, 2);
@@ -1085,7 +1085,7 @@ $unique: unique-id();
     }
   }
   @if $current-action != false {
-    $return: append($return, call($current-action, $values...));
+    $return: append($return, call(safe-get-function($current-action), $values...));
   }
   @if $action-count == 0 {
     @if length($values) == 0 {
@@ -2127,6 +2127,14 @@ $unique: unique-id();
         }
       }
     }
+  }
+}
+
+@function safe-get-function($name) {
+  @if function-exists('get-function') {
+    @return get-function($name);
+  } @else {
+    @return $name;
   }
 }
 

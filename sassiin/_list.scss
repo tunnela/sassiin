@@ -315,7 +315,7 @@
       @error "list-sort() expects parameter 2 to be a sorting algorithm, #{$algorithm} is not";
     }
   }
-  @return call("#{$algorithm}-list-sort", $list);
+  @return call(safe-get-function("#{$algorithm}-list-sort"), $list);
 }
 
 /// @group List

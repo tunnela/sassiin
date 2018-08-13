@@ -64,7 +64,7 @@ $unicode-chars:
     @for $i from 1 through length($search) {
       $string: str-replace($string, nth($search, $i), $replace);
     }
-  } @else if types($string $search $replace) == (string list list) && length($search) == length($replace) {
+  } @else if types($string $search $replace) == (string list list) and length($search) == length($replace) {
     @for $i from 1 through length($search) {
       $string: str-replace($string, nth($search, $i), nth($replace, $i));
     }

@@ -192,7 +192,7 @@ $unique: unique-id();
       value: nth($args, 2),
       property: $values
     );
-  } @else if $isDeclaration && $argc == 1 and type-of($values) == list and length($values) > 0 {
+  } @else if $isDeclaration and $argc == 1 and type-of($values) == list and length($values) > 0 {
     @each $declaration in $values {
       $action: append($action, (
         type: $type,

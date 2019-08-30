@@ -890,7 +890,7 @@ $unique: unique-id();
     $value: map-get($from, $name);
 
     @if is-executable($value) {
-      @return exec($value);
+      @return exec($value, $scope);
     }
     @return $value;
   } @else {
@@ -1061,7 +1061,7 @@ $unique: unique-id();
 ///
 /// @requires {function} exec
 /// @requires {function} is-callable
-@function exec($stack) {
+@function exec($stack, $scope: true) {
   $return: ();
   $values: ();
   $current-action: false;
@@ -1074,17 +1074,37 @@ $unique: unique-id();
       $action-count: $action-count + 1;
 
       @if $current-action != false {
+        @if $scope != true and $current-action == get {
+          $length: length($values);
+
+          @if $length == 1 {
+            $values: append($values, null);
+            $values: append($values, $scope);
+          } @else if $length == 2 {
+            $values: append($values, $scope);
+          }
+        }
         $return: append($return, call(safe-get-function($current-action), $values...));
       }
       $values: ();
       $current-action: str-slice($action, 2);
     } @else if $action-type == list {
-      $values: append($values, exec($action));
+      $values: append($values, exec($action, $scope));
     } @else {
       $values: append($values, $action);
     }
   }
   @if $current-action != false {
+    @if $scope != true and $current-action == get {
+      $length: length($values);
+
+      @if $length == 1 {
+        $values: append($values, null);
+        $values: append($values, $scope);
+      } @else if $length == 2 {
+        $values: append($values, $scope);
+      }
+    }
     $return: append($return, call(safe-get-function($current-action), $values...));
   }
   @if $action-count == 0 {
